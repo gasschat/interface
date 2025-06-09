@@ -6,7 +6,7 @@ export function Home() {
     <div className="flex flex-col min-h-[27rem] justify-center w-full max-w-2xl mx-auto px-4">
       <div className="relative flex flex-col gap-7">
         <h1 className="text-4xl  font-medium md:font-medium text-left md:text-center tracking-tight ">
-          Simply Build <br className="block md:hidden" /> Fast With Shadcn
+          Touch genius.<br className="block md:hidden" /> Think limitless
         </h1>
         <UserInput/>
       </div>

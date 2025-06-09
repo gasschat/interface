@@ -29,12 +29,11 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-// import { APIKeysDialog } from "./app/apiKeysDialog"
-// import { Button } from "@/components/ui/button"
 
 import { Link } from "react-router"
 
 // import { useUserProvider } from "@/context/user-provider";
+import { Button } from "@/components/ui/button"
 
 
 const data = {
@@ -179,12 +178,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain/>
         <NavDocuments items={data.documents} />
       </SidebarContent>
-      <SidebarFooter>
-
-        {/* <Button variant="outline" onClick={()=>apiKeysWindowState(true)}>API Keys</Button>
-        {openAPIKeysWindow&&(
-           <APIKeysDialog openWindow={openAPIKeysWindow} windowState={apiKeysWindowState}/> 
-        )} */}
+      <SidebarFooter className="border-t">
+        <Button variant="outline" className="rounded-[20px]">Settings</Button>
       </SidebarFooter>
     </Sidebar>
   )

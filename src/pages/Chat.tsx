@@ -27,7 +27,7 @@ const Message = ({ role, content}: Msg ) => {
           {role === "user" ? "U" : "A"}
         </div>
         <div className="flex flex-col gap-4">
-          <p className="text-sm">{content.content}</p>
+          <p className="text-md font-light">{content.content}</p>
         </div>
       </div>
     </div>
@@ -86,6 +86,8 @@ const PageContent = () => {
 export const Chat = () => {
   const { setOpen } = useSidebar();
   const location = useLocation();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  console.log("----CHAT------", location.state?.chat)
 
   useEffect(() => {
     setOpen(false);

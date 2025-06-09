@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -190,6 +191,7 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    font-family: "Geist", system-ui, Avenir, Helvetica, Arial, sans-serif;
   }
   body {
     @apply bg-background text-foreground;

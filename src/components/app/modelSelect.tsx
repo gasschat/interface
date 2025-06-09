@@ -5,12 +5,23 @@ import {
   DialogContent,
   DialogTitle,
 } from "../ui/dialog";
-import { useUserProvider } from "@/context/user-provider";
-import { LLMSvg } from "@/lib/types";
+import { useModel } from "@/hooks/use-model";
 
+import type { LLMProviderImg } from "@/lib/types";
 
 const ModelSelect = ({openWindow, handleOpenWindow}:{openWindow:boolean, handleOpenWindow:(state:boolean)=>void}) => {
-  const { modelList, modelListLoading, selectedModel, handleSelectModel } = useUserProvider();
+  const {currentModel, models, updateCurrentModel} = useModel()
+
+
+  const LLMProviderIcons: Record<string, string> = {
+    "openai": "/chatgpt-icon.svg",
+    "anthropic": "/anthropic-icon.svg",
+    "gemini": "/gemini-icon.svg"
+  };
+
+  console.log("MODEL", models)
+
+  if(!models) return <span>Loading...</span>
 
   return (
     <Dialog open={openWindow}>
@@ -20,6 +31,7 @@ const ModelSelect = ({openWindow, handleOpenWindow}:{openWindow:boolean, handleO
         </DialogHeader>
          <button
           onClick={() => handleOpenWindow(false)}
+          type="button"
           className="cursor-pointer w-fit absolute right-0 m-4"
         >
           <XIcon />
@@ -27,24 +39,25 @@ const ModelSelect = ({openWindow, handleOpenWindow}:{openWindow:boolean, handleO
 
         <div className="mt-6">
           <div className="grid grid-cols-3 gap-2 space-y-3">
-            {!modelListLoading && modelList?.map((provider) =>
-              provider.models.map((model) => (
+            {models.map((llm)=>(
+              llm.models.map((model)=>(
                 <div
-                  key={`${provider.id}-${model.id}`}
-                  onClick={() => handleSelectModel(provider, model)}
+                  key={`${llm.id}`}
+                  onClick={()=>updateCurrentModel({'llm': llm.name, 'model':model.name})}
                   className={`flex flex-col gap-4 items-center py-5 cursor-pointer text-sm w-full max-w-32 border rounded-4xl ${
-                    selectedModel?.model === model.name ? "border-primary" : ""
+                    currentModel?.model === model.name ? "border-primary" : ""
                   }`}
                 >
                   <img
-                    src={LLMSvg[model.name] || LLMSvg[provider.name] || "/default-icon.svg"}
+                    src={LLMProviderIcons[llm.name] as ""}
                     className="w-9 rounded-[17px]"
-                    alt={`${provider.name} icon`}
+                    alt={`${llm.title} icon`}
                   />
                   <h3 className="px-2 text-center">{model.title}</h3>
-                </div>
+              </div>
               ))
-            )}
+              ))
+            }
           </div>
         </div>
       </DialogContent>
