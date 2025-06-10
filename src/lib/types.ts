@@ -24,7 +24,7 @@ export interface CurrentModel{
   model:string
 }
 
-export interface Message{
+export interface MessageProps{
   message:AIMessage;
-  isStreaming:boolean
+  isStreaming:boolean;
 }

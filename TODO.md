@@ -1,0 +1,5 @@
+- [ ] Add disabled tag to the user input
+- [ ] Add loading state to the assistance chat section even though it did start streaming 
+- [ ] code highlighting to the markdow
+- [ ] add styling colot tp the markdown *, 1...2..3, table etc
+- [ ] add reasoning 

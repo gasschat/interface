@@ -63,6 +63,7 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput}:{handleC
           }}
           value={pathname==="/"?(homePageInput):(chatInput)}
           name="userInput"
+          // disable while streaming
         />
         <div className="relative flex flex-row items-center justify-center w-full">
           {/* <button type='button' className='text-xs font-medium px-1 hover:bg-accent/60 absolute left-3 bottom-3'>Select model </button> */}

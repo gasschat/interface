@@ -2,15 +2,16 @@ import { useEffect, useRef } from "react";
 
 import { useLocation, useNavigate } from "react-router";
 import { useChat } from "@ai-sdk/react";
-import type { Message } from "@/lib/types";
+import type { MessageProps } from "@/lib/types";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { api } from "@/lib/baseUrl";
 import { UserInput } from "@/components/app/userInput";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useSession } from "@/lib/auth-client";
 
-const Message = ({ message }: Message) => {
+const Message = ({ message, isStreaming }: MessageProps) => {
   return (
     <div className={`px-4 py-3`}>
       <div className="max-w-xl mx-auto flex gap-4">
@@ -23,15 +24,18 @@ const Message = ({ message }: Message) => {
         >
           {message.role === "user" ? "U" : "A"}
         </div>
-        <div className="flex flex-col gap-4 prose prose-invert">
+        <div className="flex flex-col gap-4">
           {message.role === "assistant" ? (
-            <div className="prose prose-invert">
+            <div className="leading-relaxed flex flex-col gap-4">
                <Markdown remarkPlugins={[remarkGfm]}>
               {message.content}
             </Markdown>
+            {isStreaming&&(
+              <span className="block h-2 w-2 bg-accent-foreground"></span>
+            )}
             </div>
           ) : (
-            <p className="text-md font-light">{message.content}</p>
+            <p className="text-md font-light leading-relaxed ">{message.content}</p>
           )}
         </div>
       </div>
@@ -45,23 +49,32 @@ export const Chat = () => {
     useChat({
       streamProtocol: "data",
       api: `${api}/ai/generate`,
+      id:"456",
+      sendExtraMessageFields:true,
+      credentials:"include"
     });
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const { pathname, state } = useLocation();
+  const { data: session, isPending } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      navigate("/login");
+    }
+  }, [isPending, session, navigate]);
 
   useEffect(() => {
     async function appendUserInput() {
-      const isNewPage = pathname.split("/")[2] === "new";
+      const isNewPage = location.pathname.split("/")[2] === "new";
       if (isNewPage) {
-        const newState = state as { chat?: string } | undefined;
+        const newState = location.state as { chat?: string } | undefined;
         if (newState) {
           const userInput = newState.chat!;
           await append({ role: "user", content: userInput });
         }
-        await navigate(pathname, { replace: true });
+        await navigate(location.pathname, { replace: true });
       }
     }
 
@@ -73,6 +86,7 @@ export const Chat = () => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+  console.log(messages)
 
   return (
     <div className="flex items-stretch h-[calc(100vh-76px)]">

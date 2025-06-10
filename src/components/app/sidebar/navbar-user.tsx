@@ -23,6 +23,9 @@ import {
     MenubarTrigger,
   } from "@/components/ui/menubar"
   
+  import { signOut } from "@/lib/auth-client";
+  import { useNavigate } from "react-router";
+  
   export function NavbarUser({
     user,
   }: {
@@ -32,11 +35,19 @@ import {
       avatar: string
     }
   }) {
+    const navigate = useNavigate();
+    const handleLogout = async () => {
+      await signOut({
+        onSuccess: () => navigate("/login"),
+        onError: () => navigate("/login"),
+      });
+    };
     return (
       <Menubar className="border-0 bg-transparent p-0">
         <MenubarMenu>
           <MenubarTrigger asChild className="rounded-full bg-transparent">
             <button
+            type="button"
               className="data-[state=open]:bg-transparent data-[state=open]:text-gray-100 flex h-8 w-fit items-center gap-2 text-left"
             >
               <Avatar className="h-7 w-7 rounded-[13px] ">
@@ -78,7 +89,7 @@ import {
               Notifications
             </MenubarItem>
             <DropdownMenuSeparator />
-            <MenubarItem className="flex items-center gap-2" variant="destructive">
+            <MenubarItem onClick={handleLogout} className="flex items-center gap-2" variant="destructive">
               <IconLogout className="size-4" />
               Log out
             </MenubarItem>
