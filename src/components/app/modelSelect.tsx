@@ -7,7 +7,6 @@ import {
 } from "../ui/dialog";
 import { useModel } from "@/hooks/use-model";
 
-import type { LLMProviderImg } from "@/lib/types";
 
 const ModelSelect = ({openWindow, handleOpenWindow}:{openWindow:boolean, handleOpenWindow:(state:boolean)=>void}) => {
   const {currentModel, models, updateCurrentModel} = useModel()
@@ -42,7 +41,7 @@ const ModelSelect = ({openWindow, handleOpenWindow}:{openWindow:boolean, handleO
             {models.map((llm)=>(
               llm.models.map((model)=>(
                 <div
-                  key={`${llm.id}`}
+                  key={`${model.id}`}
                   onClick={()=>updateCurrentModel({'llm': llm.name, 'model':model.name})}
                   className={`flex flex-col gap-4 items-center py-5 cursor-pointer text-sm w-full max-w-32 border rounded-4xl ${
                     currentModel?.model === model.name ? "border-primary" : ""

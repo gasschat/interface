@@ -45,8 +45,6 @@ export function ModelProvider({children}:ModelProviderProps){
          updateCurrentModel
     }
 
-    console.log("MODELS", data)
-
     return (
         <ModelContextProvider value={value}>
             {children}

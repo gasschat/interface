@@ -1,19 +1,17 @@
+import { useLocation, useNavigate } from "react-router";
+import { useChat } from "@ai-sdk/react";
+
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UserInput } from "@/components/app/userInput";
-import { useSidebar } from "@/components/ui/sidebar";
-import { useEffect} from "react";
-import { useLocation } from "react-router";
+import { useEffect } from "react";
+import { api } from "@/lib/baseUrl";
+import type { Message } from "@ai-sdk/react";
 
-interface Msg {
-  role: "assistant" | "user";
-  content: {
-    haveCode?: boolean;
-    content: string;
-  };
-}
 
 // Message component for chat
-const Message = ({ role, content}: Msg ) => {
+const Message = ({ id, role, content }: Message) => {
+  console.log(id)
+
   return (
     <div className={`px-4 py-3`}>
       <div className="max-w-lg mx-auto flex gap-4">
@@ -27,79 +25,71 @@ const Message = ({ role, content}: Msg ) => {
           {role === "user" ? "U" : "A"}
         </div>
         <div className="flex flex-col gap-4">
-          <p className="text-md font-light">{content.content}</p>
+          <p className="text-md font-light">{content}</p>
         </div>
       </div>
     </div>
   );
 };
 
-// Main content component
-const PageContent = () => {
-  const messages: Msg[] = [
-    {
-      role: "assistant",
-      content: {
-        content: "Hi there! I'm a chat assistant that can help you with your questions. How can I help you today?",
-      }
-    },
-    {
-      role: "user",
-      content: {
-        content: "I need help creating a page with a sidebar and content component using shadcn/ui.",
-      }
-    },
-    {
-      role: "assistant",
-      content: {
-        haveCode: true,
-        content: "I'll create a page with a sidebar and content component using shadcn/ui. I'll structure it with a separate sidebar component that we'll import into the main page."
-      },
-    }
-  ];
-
-
-  return (
-    <div className="h-full flex flex-col">
-      <ScrollArea className="flex-1 h-[26rem] w-full">
-        {messages.map((message, index) => (
-          <Message 
-            key={index} 
-            role={message.role} 
-            content={message.content} 
-          />
-        ))}
-
-        <ScrollBar orientation="vertical" />
-      </ScrollArea>
-
-      <div className="py-2 px-3">
-        <div className="w-full max-w-xl place-self-center">
-          <UserInput />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Main layout component
 export const Chat = () => {
-  const { setOpen } = useSidebar();
-  const location = useLocation();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  console.log("----CHAT------", location.state?.chat)
+  const { messages, input, handleInputChange, handleSubmit, append } = useChat({
+    streamProtocol:"data",
+    api:`${api}/ai/generate`
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const { pathname, state } = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setOpen(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]);
+    async function appendUserInput() {
+      const isNewPage = pathname.split("/")[2] === "new";
+      if (isNewPage) {
+        const newState = state as { chat?: string } | undefined;
+        if (newState) {
+          const userInput = newState.chat!;
+          await append({ role: "user", content: userInput });
+        }
+        await navigate(pathname, {replace:true})
+      }
+    }
 
+    appendUserInput().catch((err)=>console.log("error while appending", err))
+  }, []);
+
+  console.log(messages)
 
   return (
     <div className="flex items-stretch h-[calc(100vh-76px)]">
       {/* Main content */}
       <div className={`flex-1 transition-all duration-300 max-w-full`}>
-        <PageContent />
+        <div className="h-full flex flex-col">
+          <ScrollArea className="flex-1 h-[26rem] w-full">
+            {messages.map((message) => (
+          <Message 
+            key={message.id} 
+            id={message.id}
+            role={message.role} 
+            content={message.content} 
+          />
+        ))}
+
+            <ScrollBar orientation="vertical" />
+          </ScrollArea>
+
+          <div className="py-2 px-3">
+            <div className="w-full max-w-xl place-self-center">
+              <UserInput
+                handleChatSubmit={handleSubmit}
+                handleChatInputChange={handleInputChange}
+                chatInput={input}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

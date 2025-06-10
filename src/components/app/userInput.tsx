@@ -5,58 +5,64 @@ import { Send, ChevronDown } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { ModelSelect } from "./modelSelect";
 
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useModel } from "@/hooks/use-model";
 
-const UserInput = () => {
-  const [userInput, setUserInput] = useState<string>("");
+const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput}:{handleChatSubmit?:()=>void, handleChatInputChange?:(e: ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLInputElement>)=>void, chatInput?:string}) => {
   const [openModelSelectorWindow, setOpenModelSelectorWindow] = useState(false);
+  const [homePageInput, setHomePageInput] = useState<string>("")
   const {currentModel} = useModel()
 
   const navigate = useNavigate();
+  const {pathname } = useLocation()
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    console.log("Submitting:", userInput);
-    await navigate("/c/new", {
-      state: { chat: userInput },
-    });
+
+  const handleSubmit = async(e?: FormEvent<HTMLFormElement>) => {
+    e?.preventDefault();
+    if(pathname==="/"){
+      await navigate("c/new", {
+        state: {chat: homePageInput}
+      })
+    }
+    handleChatSubmit?.()
   };
 
-  const handleKeyDown = async(e: KeyboardEvent<HTMLTextAreaElement>): Promise<void> => {
+  const handleKeyDown = async (e: KeyboardEvent<HTMLTextAreaElement>)=> {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      await handleSubmit(e)
+     await handleSubmit()
 
     }
   };
+
+  const handleHomePageInputChange = (e:ChangeEvent<HTMLTextAreaElement>) => {
+    setHomePageInput(e.target.value)
+  }
 
   const handleOpenModelSelectorWindowState = () => {
     return setOpenModelSelectorWindow(!openModelSelectorWindow);
   };
 
+
   return (
     <>
       <form
-        onSubmit={(e) => {
-          handleSubmit(e).catch((err) => {
-            console.error("Form submission failed:", err);
-          });
-        }}
+        onSubmit={(e:FormEvent<HTMLFormElement>)=>{
+          handleSubmit(e).catch(()=>console.log("FormEvent Error"))}
+        }
         className="relative flex flex-col items-center"
       >
         <Textarea
-          className="w-full pt-3 pb-16  resize-none rounded-4xl border placeholder:text-base-400"
+          className="w-full pt-3 pb-16 resize-none rounded-4xl border placeholder:text-base-400"
           placeholder="Build me a..."
           required={true}
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-            setUserInput(e.target.value)
-          }
+          onChange={pathname==="/"?(handleHomePageInputChange):(handleChatInputChange)}
           maxLength={510}
-          onKeyDown={(e:KeyboardEvent<HTMLTextAreaElement>)=>{
-            handleKeyDown(e).catch((err)=>console.error("Form Submittion Failed", err))
+          onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>)=>{
+            handleKeyDown(e).catch(()=>console.log("error while submitting"))
           }}
-          value={userInput}
+          value={pathname==="/"?(homePageInput):(chatInput)}
+          name="userInput"
         />
         <div className="relative flex flex-row items-center justify-center w-full">
           {/* <button type='button' className='text-xs font-medium px-1 hover:bg-accent/60 absolute left-3 bottom-3'>Select model </button> */}
