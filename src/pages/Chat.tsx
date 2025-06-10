@@ -1,44 +1,52 @@
+import { useEffect, useRef } from "react";
+
 import { useLocation, useNavigate } from "react-router";
 import { useChat } from "@ai-sdk/react";
+import type { Message } from "@/lib/types";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { UserInput } from "@/components/app/userInput";
-import { useEffect } from "react";
 import { api } from "@/lib/baseUrl";
-import type { Message } from "@ai-sdk/react";
+import { UserInput } from "@/components/app/userInput";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
-
-// Message component for chat
-const Message = ({ id, role, content }: Message) => {
-  console.log(id)
-
+const Message = ({ message }: Message) => {
   return (
     <div className={`px-4 py-3`}>
-      <div className="max-w-lg mx-auto flex gap-4">
+      <div className="max-w-xl mx-auto flex gap-4">
         <div
           className={`h-6 w-6 rounded-[13px] flex items-center justify-center shrink-0 ${
-            role === "user"
+            message.role === "user"
               ? "bg-gray-200"
               : "bg-gradient-to-br from-pink-400 to-yellow-400"
           }`}
         >
-          {role === "user" ? "U" : "A"}
+          {message.role === "user" ? "U" : "A"}
         </div>
-        <div className="flex flex-col gap-4">
-          <p className="text-md font-light">{content}</p>
+        <div className="flex flex-col gap-4 prose prose-invert">
+          {message.role === "assistant" ? (
+            <div className="prose prose-invert">
+               <Markdown remarkPlugins={[remarkGfm]}>
+              {message.content}
+            </Markdown>
+            </div>
+          ) : (
+            <p className="text-md font-light">{message.content}</p>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-
 // Main layout component
 export const Chat = () => {
-  const { messages, input, handleInputChange, handleSubmit, append } = useChat({
-    streamProtocol:"data",
-    api:`${api}/ai/generate`
-  });
+  const { messages, input, handleInputChange, handleSubmit, append, status } =
+    useChat({
+      streamProtocol: "data",
+      api: `${api}/ai/generate`,
+    });
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const { pathname, state } = useLocation();
@@ -53,14 +61,18 @@ export const Chat = () => {
           const userInput = newState.chat!;
           await append({ role: "user", content: userInput });
         }
-        await navigate(pathname, {replace:true})
+        await navigate(pathname, { replace: true });
       }
     }
 
-    appendUserInput().catch((err)=>console.log("error while appending", err))
+    appendUserInput().catch((err) => console.log("error while appending", err));
   }, []);
 
-  console.log(messages)
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   return (
     <div className="flex items-stretch h-[calc(100vh-76px)]">
@@ -68,14 +80,20 @@ export const Chat = () => {
       <div className={`flex-1 transition-all duration-300 max-w-full`}>
         <div className="h-full flex flex-col">
           <ScrollArea className="flex-1 h-[26rem] w-full">
-            {messages.map((message) => (
-          <Message 
-            key={message.id} 
-            id={message.id}
-            role={message.role} 
-            content={message.content} 
-          />
-        ))}
+            {messages.map((message, index) => {
+              const isLastAssistantMessage =
+                index === messages.length - 1 &&
+                message.role === "assistant" &&
+                status === "streaming";
+
+              return (
+                <Message
+                  key={message.id}
+                  message={message}
+                  isStreaming={isLastAssistantMessage}
+                />
+              );
+            })}
 
             <ScrollBar orientation="vertical" />
           </ScrollArea>

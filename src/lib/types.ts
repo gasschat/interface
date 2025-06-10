@@ -1,3 +1,5 @@
+import type { Message as AIMessage} from "@ai-sdk/react";
+
 export interface Model{
   id:string
   title:string;
@@ -20,4 +22,9 @@ export interface AvailableModels{
 export interface CurrentModel{
   llm:string
   model:string
+}
+
+export interface Message{
+  message:AIMessage;
+  isStreaming:boolean
 }
