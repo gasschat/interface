@@ -1,3 +1,4 @@
+import { useState} from "react"
 import {
   IconDots,
   IconShare3,
@@ -21,6 +22,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+import { DeleteThread } from "../delete-thread"
+
 import useSWR from "swr"
 
 import { Link, useLocation } from "react-router"
@@ -30,10 +33,23 @@ import { threads } from "@/lib/fetch"
 import type { ThreadOverview } from "@/lib/types"
 
 export function NavDocuments() {
+  const [openDeleteThreadWindow, setOpenDeleteThreadWindow] = useState(false)
+  const [selectedThread, setSelectedThread ]= useState<ThreadOverview|null>(null)
   const {data, isLoading} = useSWR<ThreadOverview[]>(`${api}/ai/threads`, threads)
   const location = useLocation()
 
   const { isMobile } = useSidebar()
+
+  const handleOpenWindow = (state:boolean, thread?:ThreadOverview) => {
+    if(state===true){
+      if(!thread) return;
+      setSelectedThread(thread)
+      setOpenDeleteThreadWindow(true)
+      return;
+    }
+    setSelectedThread(null)
+
+  }
 
 
   if(isLoading) return <div className="block w-7 h-6 rounded-full border animate-spin"></div>
@@ -42,11 +58,11 @@ export function NavDocuments() {
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel className="tracking-wider">Chats</SidebarGroupLabel>
       <SidebarMenu>
-        {data?.map((item) => (
-          <SidebarMenuItem key={item.id} className="space-y-2">
-            <SidebarMenuButton asChild className={`${location.pathname.split("/")[2]===item.id&&'bg-accent'}`}>
-              <Link to={`c/${item.id}`}>
-                <span>{item.title}</span>
+        {data?.map((thread) => (
+          <SidebarMenuItem key={thread.id} className="space-y-2">
+            <SidebarMenuButton asChild className={`${location.pathname.split("/")[2]===thread.id&&'bg-accent'}`}>
+              <Link to={`c/${thread.id}`}>
+                <span>{thread.title}</span>
               </Link>
             </SidebarMenuButton>
             <DropdownMenu>
@@ -69,7 +85,10 @@ export function NavDocuments() {
                   <span>Share</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
+                <DropdownMenuItem 
+                variant="destructive"
+                onClick={()=>handleOpenWindow(true, thread)}
+                >
                   <IconTrash />
                   <span>Delete</span>
                 </DropdownMenuItem>
@@ -79,6 +98,10 @@ export function NavDocuments() {
         ))}
         
       </SidebarMenu>
+
+      {openDeleteThreadWindow&&selectedThread&&(
+        <DeleteThread openWindow={openDeleteThreadWindow} handleOpenWindow={handleOpenWindow} thread={selectedThread}/>
+      )}
     </SidebarGroup>
   )
 }

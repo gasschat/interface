@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef} from "react";
 
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { useChat } from "@ai-sdk/react";
 import type { MessageProps } from "@/lib/types";
 import Markdown from "react-markdown";
@@ -45,36 +45,41 @@ const Message = ({ message, isStreaming }: MessageProps) => {
 
 // Main layout component
 export const Chat = () => {
-  const { messages, input, handleInputChange, handleSubmit, append, status } =
+  const cId = useParams()
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  if(!cId.chatId){
+    const nv  = async() => await navigate("/not-found")
+    nv().catch((err)=>console.log(err))
+  }
+  const { messages, input, handleInputChange, handleSubmit, append, status} =
     useChat({
       streamProtocol: "data",
       api: `${api}/ai/generate`,
-      id:"456",
+      id:cId.chatId,
       sendExtraMessageFields:true,
       credentials:"include"
     });
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data: session, isPending } = useSession();
-  const navigate = useNavigate();
-  const location = useLocation();
 
+  // move this to Layout 
   useEffect(() => {
     if (!isPending && !session?.user) {
       navigate("/login");
     }
   }, [isPending, session, navigate]);
 
+
   useEffect(() => {
     async function appendUserInput() {
-      const isNewPage = location.pathname.split("/")[2] === "new";
-      if (isNewPage) {
         const newState = location.state as { chat?: string } | undefined;
         if (newState) {
           const userInput = newState.chat!;
           await append({ role: "user", content: userInput });
-        }
-        await navigate(location.pathname, { replace: true });
+          await navigate(location.pathname, { replace: true });
       }
     }
 
@@ -86,7 +91,7 @@ export const Chat = () => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
-  console.log(messages)
+
 
   return (
     <div className="flex items-stretch h-[calc(100vh-76px)]">

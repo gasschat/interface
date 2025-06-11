@@ -8,6 +8,8 @@ import { ModelSelect } from "./modelSelect";
 import { useLocation, useNavigate } from "react-router";
 import { useModel } from "@/hooks/use-model";
 
+import { v4 as uuidv4 } from "uuid";
+
 const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput}:{handleChatSubmit?:()=>void, handleChatInputChange?:(e: ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLInputElement>)=>void, chatInput?:string}) => {
   const [openModelSelectorWindow, setOpenModelSelectorWindow] = useState(false);
   const [homePageInput, setHomePageInput] = useState<string>("")
@@ -20,7 +22,8 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput}:{handleC
   const handleSubmit = async(e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
     if(pathname==="/"){
-      await navigate("c/new", {
+      const getUUID = (uuidv4 as () => string)()
+      await navigate(`c/${getUUID}`, {
         state: {chat: homePageInput}
       })
     }
