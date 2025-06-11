@@ -10,6 +10,8 @@ import { api } from "@/lib/baseUrl";
 import { UserInput } from "@/components/app/userInput";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useSession } from "@/lib/auth-client";
+import { getChatHistory } from "@/lib/fetch";
+import useSWRMutation from "swr/mutation";
 
 const Message = ({ message, isStreaming }: MessageProps) => {
   return (
@@ -49,38 +51,45 @@ export const Chat = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { data: session, isPending } = useSession();
+  // move to layout
+  useEffect(() => {
+    const ff = async()=>{
+     if (!isPending && !session?.user) {
+      await navigate("/login")}
+    }
+    ff().catch(console.log)
+  }, [isPending, session, navigate]);
+
   if(!cId.chatId){
     const nv  = async() => await navigate("/not-found")
     nv().catch((err)=>console.log(err))
   }
+  const {trigger:fetchTheChatHis, data:chatHis, isMutating: isFetchingChatHistory} = useSWRMutation(`${api}/ai/thread/${cId.chatId}`,  getChatHistory)
+
   const { messages, input, handleInputChange, handleSubmit, append, status} =
     useChat({
       streamProtocol: "data",
       api: `${api}/ai/generate`,
       id:cId.chatId,
+      initialMessages:chatHis || [],
       sendExtraMessageFields:true,
       credentials:"include"
     });
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: session, isPending } = useSession();
-
-  // move this to Layout 
-  useEffect(() => {
-    if (!isPending && !session?.user) {
-      navigate("/login");
-    }
-  }, [isPending, session, navigate]);
-
-
+  // 
   useEffect(() => {
     async function appendUserInput() {
         const newState = location.state as { chat?: string } | undefined;
         if (newState) {
           const userInput = newState.chat!;
-          await append({ role: "user", content: userInput });
           await navigate(location.pathname, { replace: true });
-      }
+          await append({ role: "user", content: userInput });
+          return;
+        }
+        fetchTheChatHis().catch(console.log)
+      
     }
 
     appendUserInput().catch((err) => console.log("error while appending", err));
@@ -123,6 +132,7 @@ export const Chat = () => {
                 handleChatSubmit={handleSubmit}
                 handleChatInputChange={handleInputChange}
                 chatInput={input}
+                disable={!isFetchingChatHistory && status==="streaming"}
               />
             </div>
           </div>

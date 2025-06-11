@@ -22,9 +22,10 @@ const DeleteThread = ({
     `${api}/ai/delete-thread/${thread.id}`,
     deleteThread
   );
-  const currentLocation = location.pathname.split("/")[2]
   const navigate = useNavigate()
-  console.log(currentLocation)
+  const location = useLocation()
+  const currentLocation = location.pathname.split("/")[2]
+  console.log("CURRENT LOCATION", currentLocation)
 
   const handleDelete = () => {
     trigger()

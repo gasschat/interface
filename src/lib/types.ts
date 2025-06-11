@@ -1,4 +1,4 @@
-import type { Message as AIMessage} from "@ai-sdk/react";
+import type { Message as AIMessage, Message} from "@ai-sdk/react";
 
 export interface Model{
   id:string
@@ -37,4 +37,8 @@ export interface ThreadOverview{
 
 export type GetThreads = {
   threads: ThreadOverview[]
+}
+
+export type ChatHostory = {
+  chats: Message[]
 }

@@ -10,7 +10,7 @@ import { useModel } from "@/hooks/use-model";
 
 import { v4 as uuidv4 } from "uuid";
 
-const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput}:{handleChatSubmit?:()=>void, handleChatInputChange?:(e: ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLInputElement>)=>void, chatInput?:string}) => {
+const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}:{handleChatSubmit?:()=>void, handleChatInputChange?:(e: ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLInputElement>)=>void, chatInput?:string, disable:boolean}) => {
   const [openModelSelectorWindow, setOpenModelSelectorWindow] = useState(false);
   const [homePageInput, setHomePageInput] = useState<string>("")
   const {currentModel} = useModel()
@@ -66,7 +66,7 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput}:{handleC
           }}
           value={pathname==="/"?(homePageInput):(chatInput)}
           name="userInput"
-          // disable while streaming
+          disabled={disable}
         />
         <div className="relative flex flex-row items-center justify-center w-full">
           {/* <button type='button' className='text-xs font-medium px-1 hover:bg-accent/60 absolute left-3 bottom-3'>Select model </button> */}

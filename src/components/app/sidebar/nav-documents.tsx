@@ -58,11 +58,11 @@ export function NavDocuments() {
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel className="tracking-wider">Chats</SidebarGroupLabel>
       <SidebarMenu>
-        {data?.map((thread) => (
+        {data?.map((thread, index) => (
           <SidebarMenuItem key={thread.id} className="space-y-2">
             <SidebarMenuButton asChild className={`${location.pathname.split("/")[2]===thread.id&&'bg-accent'}`}>
               <Link to={`c/${thread.id}`}>
-                <span>{thread.title}</span>
+                <span>{index+1} {thread.title}</span>
               </Link>
             </SidebarMenuButton>
             <DropdownMenu>
