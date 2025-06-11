@@ -2,7 +2,6 @@ import {
   IconDots,
   IconShare3,
   IconTrash,
-  type Icon,
 } from "@tabler/icons-react"
 
 import {
@@ -21,28 +20,33 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { Link } from "react-router"
 
-export function NavDocuments({
-  items,
-}: {
-  items: {
-    name: string
-    url: string
-    icon: Icon
-  }[]
-}) {
+import useSWR from "swr"
+
+import { Link, useLocation } from "react-router"
+import { api } from "@/lib/baseUrl"
+
+import { threads } from "@/lib/fetch"
+import type { ThreadOverview } from "@/lib/types"
+
+export function NavDocuments() {
+  const {data, isLoading} = useSWR<ThreadOverview[]>(`${api}/ai/threads`, threads)
+  const location = useLocation()
+
   const { isMobile } = useSidebar()
+
+
+  if(isLoading) return <div className="block w-7 h-6 rounded-full border animate-spin"></div>
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel className="tracking-wider">Chats</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <Link to={`c/${item.name}`}>
-                <span>{item.name}</span>
+        {data?.map((item) => (
+          <SidebarMenuItem key={item.id} className="space-y-2">
+            <SidebarMenuButton asChild className={`${location.pathname.split("/")[2]===item.id&&'bg-accent'}`}>
+              <Link to={`c/${item.id}`}>
+                <span>{item.title}</span>
               </Link>
             </SidebarMenuButton>
             <DropdownMenu>

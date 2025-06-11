@@ -28,3 +28,13 @@ export interface MessageProps{
   message:AIMessage;
   isStreaming:boolean;
 }
+
+export interface ThreadOverview{
+  id:string;
+  title:string;
+  updatedAt:Date
+}
+
+export type GetThreads = {
+  threads: ThreadOverview[]
+}
