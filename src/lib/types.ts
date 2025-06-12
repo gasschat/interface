@@ -27,6 +27,7 @@ export interface CurrentModel{
 export interface MessageProps{
   message:AIMessage;
   isStreaming:boolean;
+  id:string
 }
 
 export interface ThreadOverview{
