@@ -26,9 +26,20 @@ export const threads = async (url: string): Promise<ThreadOverview[]> => {
 
 // Refactor this
 export const deleteThread = async (url: string) => {
-  const response = await axios.delete(url, {
-    withCredentials: true,
-  });
+    const splitChatId = url.split("/");
+    const chatId = splitChatId[splitChatId.length - 1];
+
+   const isChatInLocal = (await db.messages.get(chatId)) || undefined;
+
+    const response = await axios.delete(url, {
+        withCredentials: true,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if(isChatInLocal && response.data.message){
+        console.log("Deleteing from local")
+    // await db.messages.delete(chatId)
+    db.messages.delete(chatId).then(()=>console.log("Deleted from the localDB")).catch(console.log)
+   }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return response.data;
 };

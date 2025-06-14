@@ -8,6 +8,7 @@ import { api } from "@/lib/baseUrl";
 
 import { deleteThread } from "@/lib/fetch";
 import { useLocation, useNavigate } from "react-router";
+import { mutate } from "swr";
 
 const DeleteThread = ({
   openWindow,
@@ -30,6 +31,7 @@ const DeleteThread = ({
   const handleDelete = () => {
     trigger()
       .then(async() => {
+        await mutate(`${api}/ai/threads`)
         if(thread.id===currentLocation){
             await navigate("/")
         }
