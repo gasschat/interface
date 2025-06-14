@@ -43,3 +43,11 @@ export type GetThreads = {
 export type ChatHostory = {
   chats: Message[]
 }
+
+export type Streaming = Message & {
+  type: "user_input" | "chat_streaming" | "chat_completed"
+}
+
+export interface ConnectedClients{
+  [key:string]: string
+}

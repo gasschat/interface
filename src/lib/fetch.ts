@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import type { AvailableModels, GetThreads, ThreadOverview, ChatHostory} from "./types";
+import type { AvailableModels, GetThreads, ThreadOverview, ChatHostory, ConnectedClients} from "./types";
 
 
 
@@ -34,4 +34,13 @@ export const getChatHistory = async(url:string)=>{
     })
     const chats = response.data.chats
     return chats
+}
+
+export const getConnectedClients = async(url:string)=>{
+    const response = await axios.get<ConnectedClients>(url,{
+        withCredentials:true
+    })
+    const cc = response.data.connectedClients
+    console.log("~~~~Connected client~~~~~~~~~~", cc)
+    return cc
 }
