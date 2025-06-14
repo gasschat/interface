@@ -10,11 +10,13 @@ import { api } from "@/lib/baseUrl";
 import { UserInput } from "@/components/app/userInput";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useSession } from "@/lib/auth-client";
-import { getChatHistory } from "@/lib/fetch";
+import { getChatHistory, getConnectedClients } from "@/lib/fetch";
 import useSWRMutation from "swr/mutation";
 import { mutate } from "swr";
+import { v4 as uuid4 } from "uuid";
 
 import { extractJsonFromStream } from "@/lib/utils";
+
 
 const Message = ({ id, message, isStreaming }: MessageProps) => {
   return (
@@ -53,6 +55,7 @@ export const Chat = () => {
   const cId = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const clientId = useRef<string|null>(null)
 
   const { data: session, isPending } = useSession();
   // move to layout
@@ -65,6 +68,13 @@ export const Chat = () => {
     ff().catch(console.log);
   }, [isPending, session, navigate]);
 
+  useEffect(()=>{
+    if(!clientId.current){
+    clientId.current = "client-" + "" + uuid4()
+    }
+  },[])
+
+
   if (!cId.chatId) {
     const nv = async () => await navigate("/not-found");
     nv().catch((err) => console.log(err));
@@ -74,6 +84,8 @@ export const Chat = () => {
     data: chatHis,
     isMutating: isFetchingChatHistory,
   } = useSWRMutation(`${api}/ai/thread/${cId.chatId}`, getChatHistory);
+  const {trigger:fetchConnectedClients, data:connectedClients} = useSWRMutation(`${api}/ai/connected-clients`, getConnectedClients)
+
   const [chatsCopy, setChatsCopy] = useState<Message[]>(chatHis ? chatHis : []);
 
   const { messages, input, handleInputChange, handleSubmit, append, status } =
@@ -84,6 +96,9 @@ export const Chat = () => {
       initialMessages: chatHis || [],
       sendExtraMessageFields: true,
       credentials: "include",
+      body: {
+        clientId: clientId.current
+      }
     });
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -137,18 +152,17 @@ export const Chat = () => {
       }
 
       console.log(`Connecting to stream for chatId: ${cId.chatId}`);
-      eventSource = new EventSource(`${api}/ai/stream/${cId.chatId}`, {
+      eventSource = new EventSource(`${api}/ai/stream/${cId.chatId}?clientId=${clientId.current}`, {
         withCredentials: true,
       });
 
       // Handle different message types
       eventSource.addEventListener("message", (event: any) => {
-        // Handle your chat messages here
-        // setMessages(prev => [...prev, JSON.parse(event.data)]);
 
         const msgObj = extractJsonFromStream(event.data);
 
         if (msgObj) {
+          if(msgObj.type==="user_input" || msgObj.type==="chat_streaming")
           setChatsCopy((prevChats) => {
             const index = prevChats.findIndex((chat) => chat.id === msgObj.id);
 
@@ -170,6 +184,10 @@ export const Chat = () => {
               return [...prevChats, newChats];
             }
           });
+          // if(msgObj.type==="chat_completed"){
+
+          // }
+
         }
       });
 
@@ -232,6 +250,14 @@ export const Chat = () => {
     };
   }, [cId.chatId]);
 
+  //  useFetching at setinterval do not use sse for now
+  useEffect(() => {
+  if (!cId.chatId) return;
+  if (!clientId.current) return;
+
+  // Initial connection
+}, [cId.chatId]);
+
   useEffect(() => {
     if (
       chatsCopy.length === 2 &&
@@ -246,6 +272,18 @@ export const Chat = () => {
       hasRevalidated.current = false;
     }
   }, [chatsCopy.length, status, cId.chatId]);
+
+
+  useEffect(() => {
+  const intervalId = setInterval(() => {
+    // Your code to run every interval
+    fetchConnectedClients().catch(console.log)
+  }, 3000);
+
+  return () => {
+    clearInterval(intervalId); // Clear the interval
+  };
+    }, []);
 
   return (
     <div className="flex items-stretch h-[calc(100vh-76px)]">
