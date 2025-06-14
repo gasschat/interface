@@ -1,46 +1,68 @@
 import axios from "axios";
 
-import type { AvailableModels, GetThreads, ThreadOverview, ChatHostory, ConnectedClients} from "./types";
+import type {
+  AvailableModels,
+  GetThreads,
+  ThreadOverview,
+  ChatHostory,
+  ConnectedClients,
+} from "./types";
 
+import { db } from "@/local-db/db";
 
+export const getModels = async (url: string): Promise<AvailableModels[]> => {
+  const response = await axios.get<AvailableModels[]>(url, {
+    withCredentials: true,
+  });
+  return response.data;
+};
 
-export const getModels = async(url: string): Promise<AvailableModels[]>=>{
-    const response = await axios.get<AvailableModels[]>(url, {
-        withCredentials:true
-    })
-    return response.data
-}
+export const threads = async (url: string): Promise<ThreadOverview[]> => {
+  const response = await axios.get<GetThreads>(url, {
+    withCredentials: true,
+  });
+  return response.data.threads;
+};
 
+// Refactor this
+export const deleteThread = async (url: string) => {
+  const response = await axios.delete(url, {
+    withCredentials: true,
+  });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return response.data;
+};
 
-export const threads = async(url:string): Promise<ThreadOverview[]> =>{
-    const response = await axios.get<GetThreads>(url, {
-        withCredentials:true,
-    })
-    return response.data.threads
-}
+export const getChatHistory = async (url: string) => {
+  const splitChatId = url.split("/");
+  const chatId = splitChatId[splitChatId.length - 1];
 
-// Refactor this 
-export const deleteThread = async(url:string)=>{
-    const response = await axios.delete(url,{
-        withCredentials:true,
-    })
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return response.data
-}
+  const isChatInLocal = (await db.messages.get(chatId)) || undefined;
+  if (!isChatInLocal) {
+    console.log("Getting chat from backend")
+    const response = await axios.get<ChatHostory>(url, {
+      withCredentials: true,
+    });
+    const chats = response.data.chats;
 
-export const getChatHistory = async(url:string)=>{
-    const response = await axios.get<ChatHostory>(url,{
-        withCredentials:true
-    })
-    const chats = response.data.chats
-    return chats
-}
+    // if doesnot exist while retriving save the msg in db no next tike it will be fucking fast, even if users cjust visit the chat didn' intract just save it
+    //save in local db on first visti 
+    if(chats.length>0){
+        db.messages.put({id:chatId, messages:chats}).catch(console.log)
+    }
 
-export const getConnectedClients = async(url:string)=>{
-    const response = await axios.get<ConnectedClients>(url,{
-        withCredentials:true
-    })
-    const cc = response.data.connectedClients
-    console.log("~~~~Connected client~~~~~~~~~~", cc)
-    return cc
-}
+    return chats;
+  }
+//   console.log("Getting chat from Local DB", isChatInLocal.messages)
+  return isChatInLocal.messages
+};
+
+export const getConnectedClients = async (
+  url: string
+): Promise<ConnectedClients> => {
+  const response = await axios.get<ConnectedClients>(url, {
+    withCredentials: true,
+  });
+  const cc = response.data;
+  return cc;
+};

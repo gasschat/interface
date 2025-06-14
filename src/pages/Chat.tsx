@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useLocation, useNavigate, useParams } from "react-router";
 import { useChat, type Message } from "@ai-sdk/react";
-import type { MessageProps } from "@/lib/types";
+import type { ConnectedClients, MessageProps } from "@/lib/types";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -16,7 +16,7 @@ import { mutate } from "swr";
 import { v4 as uuid4 } from "uuid";
 
 import { extractJsonFromStream } from "@/lib/utils";
-
+import { db } from "@/local-db/db";
 
 const Message = ({ id, message, isStreaming }: MessageProps) => {
   return (
@@ -55,9 +55,15 @@ export const Chat = () => {
   const cId = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const clientId = useRef<string|null>(null)
+  const clientId = useRef<string | null>(null);
 
   const { data: session, isPending } = useSession();
+  const primaryConnectedClient = useRef<ConnectedClients>({});
+  const { trigger: fetchConnectedClients } = useSWRMutation(
+    `${api}/ai/connected-clients`,
+    getConnectedClients
+  );
+
   // move to layout
   useEffect(() => {
     const ff = async () => {
@@ -68,12 +74,27 @@ export const Chat = () => {
     ff().catch(console.log);
   }, [isPending, session, navigate]);
 
-  useEffect(()=>{
-    if(!clientId.current){
-    clientId.current = "client-" + "" + uuid4()
+  useEffect(() => {
+    if (!clientId.current) {
+      clientId.current = "client-" + "" + uuid4();
     }
-  },[])
+  }, []);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      // Your code to run every interval
+      fetchConnectedClients()
+        .catch(console.log)
+        .then((clientConnected) => {
+          primaryConnectedClient.current = clientConnected!;
+        })
+        .catch((e) => console.log(e));
+    }, 3000);
+
+    return () => {
+      clearInterval(intervalId); // Clear the interval
+    };
+  }, [fetchConnectedClients]);
 
   if (!cId.chatId) {
     const nv = async () => await navigate("/not-found");
@@ -84,9 +105,9 @@ export const Chat = () => {
     data: chatHis,
     isMutating: isFetchingChatHistory,
   } = useSWRMutation(`${api}/ai/thread/${cId.chatId}`, getChatHistory);
-  const {trigger:fetchConnectedClients, data:connectedClients} = useSWRMutation(`${api}/ai/connected-clients`, getConnectedClients)
-
+  // make this hook like useChat
   const [chatsCopy, setChatsCopy] = useState<Message[]>(chatHis ? chatHis : []);
+  const [chatCopyStatus, setChatCopyStatus] = useState<"ready" | "streaming"|"stopped">("ready")
 
   const { messages, input, handleInputChange, handleSubmit, append, status } =
     useChat({
@@ -97,14 +118,13 @@ export const Chat = () => {
       sendExtraMessageFields: true,
       credentials: "include",
       body: {
-        clientId: clientId.current
-      }
+        clientId: clientId.current,
+      },
     });
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const cc = useRef(0);
   const hasRevalidated = useRef(false);
-
 
   useEffect(() => {
     async function appendUserInput() {
@@ -125,7 +145,6 @@ export const Chat = () => {
     appendUserInput().catch((err) => console.log("error while appending", err));
   }, [location]);
 
-
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
@@ -138,125 +157,101 @@ export const Chat = () => {
     }
   }, [chatHis, location]);
 
-  useEffect(() => {
-    if (!cId.chatId) return;
+  // console.log("Chat Streaming Status", chatCopyStatus)
 
-    let eventSource = null;
-    let reconnectAttempts = 0;
-    const maxReconnectAttempts = 5;
+ useEffect(() => {
+  if (!cId.chatId) return;
 
-    const connectToStream = () => {
-      // Close existing connection if any
-      if (eventSource) {
-        eventSource.close();
-      }
+  let eventSource = null;
+  let shouldReconnect = true;
 
-      console.log(`Connecting to stream for chatId: ${cId.chatId}`);
-      eventSource = new EventSource(`${api}/ai/stream/${cId.chatId}?clientId=${clientId.current}`, {
-        withCredentials: true,
-      });
+  const connectToStream = () => {
+    if (eventSource) eventSource.close();
 
-      // Handle different message types
-      eventSource.addEventListener("message", (event: any) => {
+    console.log(`Connecting to stream for chatId: ${cId.chatId}`);
+    eventSource = new EventSource(
+      `${api}/ai/stream/${cId.chatId}?clientId=${clientId.current}`,
+      { withCredentials: true }
+    );
 
-        const msgObj = extractJsonFromStream(event.data);
-
-        if (msgObj) {
-          if(msgObj.type==="user_input" || msgObj.type==="chat_streaming")
-          setChatsCopy((prevChats) => {
-            const index = prevChats.findIndex((chat) => chat.id === msgObj.id);
-
-            if (index !== -1) {
-              // If the message exists → update its content
-              const updatedChats = [...prevChats];
-              updatedChats[index] = {
-                ...updatedChats[index],
-                content: msgObj.content, // Only update the content
-              };
-              return updatedChats;
-            } else {
-              // If it doesn't exist → append the new message
-              const newChats: Message = {
-                id: msgObj.id,
-                role: msgObj.role,
-                content: msgObj.content,
-              };
-              return [...prevChats, newChats];
-            }
-          });
-          // if(msgObj.type==="chat_completed"){
-
-          // }
-
-        }
-      });
-
-      eventSource.addEventListener("subscribed", (event) => {
-        console.log("Subscription confirmed:", event.data);
-        reconnectAttempts = 0; // Reset reconnect counter on successful connection
-      });
-
-      eventSource.addEventListener("ping", (event) => {
-        console.log("Keep-alive ping:", event.data);
-        // Connection is healthy
-      });
-
-      eventSource.addEventListener("error", (event) => {
-        console.log("Error event from server:", event.data);
-        // Handle server-side errors
-      });
-
-      eventSource.onopen = () => {
-        console.log("SSE connection opened");
-        reconnectAttempts = 0;
-      };
-
-      eventSource.onerror = (error) => {
-        console.error("SSE connection error:", error);
-        console.log("ReadyState:", eventSource?.readyState);
-
-        if (eventSource?.readyState === EventSource.CLOSED) {
-          console.log("Connection closed by server");
-
-          // Attempt to reconnect with exponential backoff
-          if (reconnectAttempts < maxReconnectAttempts) {
-            const delay = Math.pow(2, reconnectAttempts) * 1000; // 1s, 2s, 4s, 8s, 16s
-            console.log(
-              `Reconnecting in ${delay}ms... (attempt ${
-                reconnectAttempts + 1
-              }/${maxReconnectAttempts})`
-            );
-
-            setTimeout(() => {
-              reconnectAttempts++;
-              connectToStream();
-            }, delay);
+    eventSource.onmessage = (event) => {
+      const msgObj = extractJsonFromStream(event.data);
+      
+      if (msgObj && (msgObj.type === "user_input" || msgObj.type === "chat_streaming")) {
+        setChatCopyStatus("streaming")
+        setChatsCopy((prevChats) => {
+          const index = prevChats.findIndex(chat => chat.id === msgObj.id);
+          
+          if (index !== -1) {
+            // Update existing message
+            const updatedChats = [...prevChats];
+            updatedChats[index] = { ...updatedChats[index], content: msgObj.content };
+            return updatedChats;
           } else {
-            console.error("Max reconnection attempts reached");
+            // Add new message
+            return [...prevChats, {
+              id: msgObj.id,
+              role: msgObj.role,
+              content: msgObj.content,
+            }];
           }
+        });
+      }
+
+       if (msgObj && msgObj.type === "chat_completed") {
+          setChatCopyStatus("stopped");
         }
-      };
     };
 
-    // Initial connection
-    connectToStream();
-
-    // Cleanup function
-    return () => {
-      console.log("Cleaning up SSE connection");
-      if (eventSource) {
-        eventSource.close();
+    eventSource.onerror = () => {
+      console.error("SSE connection error");
+      eventSource.close();
+      
+      if (shouldReconnect) {
+        setTimeout(connectToStream, 2000); // Simple 2s retry
       }
     };
-  }, [cId.chatId]);
+
+    eventSource.onopen = () => {
+      console.log("SSE connection opened");
+    };
+  };
+
+  // Stop streaming function
+  const stopStream = () => {
+    shouldReconnect = false;
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+    console.log("Stream stopped");
+  };
+
+  // Listen for stop signal
+  const handleStopStream = () => stopStream();
+  
+  // You can trigger this with a custom event or prop
+  window.addEventListener('stopSSEStream', handleStopStream);
+
+  connectToStream();
+
+  return () => {
+    shouldReconnect = false;
+    if (eventSource) eventSource.close();
+    window.removeEventListener('stopSSEStream', handleStopStream);
+  };
+}, [cId.chatId]);
+
+// To stop the stream from anywhere in your app:
+// window.dispatchEvent(new CustomEvent('stopSSEStream'));
 
   //  useFetching at setinterval do not use sse for now
   useEffect(() => {
-  if (!cId.chatId) return;
-  if (!clientId.current) return;
+    if (!cId.chatId) return;
+    if (!clientId.current) return;
 
-  // Initial connection
-}, [cId.chatId]);
+    // Initial connection
+  }, [cId.chatId]);
 
   useEffect(() => {
     if (
@@ -273,17 +268,18 @@ export const Chat = () => {
     }
   }, [chatsCopy.length, status, cId.chatId]);
 
-
-  useEffect(() => {
-  const intervalId = setInterval(() => {
-    // Your code to run every interval
-    fetchConnectedClients().catch(console.log)
-  }, 3000);
-
-  return () => {
-    clearInterval(intervalId); // Clear the interval
-  };
-    }, []);
+  useEffect(()=>{
+    if(chatCopyStatus==="stopped"){
+      if (primaryConnectedClient.current) {
+        const chatId =  cId.chatId
+        const getPrimaryClient = primaryConnectedClient.current.connectedClients as unknown as Record<string, string>;
+        if(clientId.current===getPrimaryClient?.[chatId!]){
+          console.log("This is the primary window")
+          db.messages.put({id: chatId, messages: chatsCopy}).then(()=>console.log("The data is saaved ion the db")).catch(console.log)
+          }
+        }
+    }
+  },[chatCopyStatus])
 
   return (
     <div className="flex items-stretch h-[calc(100vh-76px)]">
