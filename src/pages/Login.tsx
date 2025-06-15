@@ -1,19 +1,17 @@
 import { signIn } from "@/lib/auth-client";
-import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 
 export default function Login() {
-  const navigate = useNavigate();
 
   const handleGoogleLogin = async () => {
+
     await signIn.social(
-      { provider: "google" },
+      { provider: "google", callbackURL:`http://localhost:5173` },
       {
-        onSuccess: () => navigate("/"),
         onError: (error) => {
           console.log(error)
           alert("Login failed")
-        }
+        },
       }
     );
   };
