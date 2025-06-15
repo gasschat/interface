@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { useLocation, useNavigate, useParams } from "react-router";
 import { useChat, type Message } from "@ai-sdk/react";
-import type { ConnectedClients, MessageProps } from "@/lib/types";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import type { ConnectedClients } from "@/lib/types";
+import { ChatMessage } from "@/components/app/ChatMessage";
 
 import { api } from "@/lib/baseUrl";
 import { UserInput } from "@/components/app/userInput";
@@ -18,37 +17,6 @@ import { v4 as uuid4 } from "uuid";
 import { extractJsonFromStream } from "@/lib/utils";
 import { db } from "@/local-db/db";
 
-const Message = ({ id, message, isStreaming }: MessageProps) => {
-  return (
-    <div className={`px-4 py-3`} key={id}>
-      <div className="max-w-xl mx-auto flex gap-4">
-        <div
-          className={`h-6 w-6 rounded-[13px] flex items-center justify-center shrink-0 ${
-            message.role === "user"
-              ? "bg-gray-200"
-              : "bg-gradient-to-br from-pink-400 to-yellow-400"
-          }`}
-        >
-          {message.role === "user" ? "U" : "A"}
-        </div>
-        <div className="flex flex-col gap-4">
-          {message.role === "assistant" ? (
-            <div className="leading-relaxed flex flex-col gap-4">
-              <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
-              {isStreaming && (
-                <span className="block h-2 w-2 bg-accent-foreground"></span>
-              )}
-            </div>
-          ) : (
-            <p className="text-md font-light leading-relaxed ">
-              {message.content}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Main layout component
 export const Chat = () => {
@@ -144,6 +112,7 @@ export const Chat = () => {
 
     appendUserInput().catch((err) => console.log("error while appending", err));
   }, [location]);
+
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -294,7 +263,7 @@ export const Chat = () => {
                 status === "streaming";
 
               return (
-                <Message
+                <ChatMessage
                   id={message.id}
                   key={message.id}
                   message={message}
