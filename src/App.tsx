@@ -7,6 +7,7 @@ import { Layout } from "./pages/Layout"
 import { Home } from "./pages/Home"
 import { Chat } from "./pages/Chat"
 import Login from "./pages/Login"
+import SharedChat from "./pages/SharedChat"
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="c/:chatId" element={<Chat/>} />
         </Route>
+        <Route path="/share/:chatId" element={<SharedChat/>}/> 
       </Routes>
       </ModelProvider>
 

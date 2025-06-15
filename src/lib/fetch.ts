@@ -4,11 +4,13 @@ import type {
   AvailableModels,
   GetThreads,
   ThreadOverview,
-  ChatHostory,
+  ChatHistory,
   ConnectedClients,
+  ForkThread,
 } from "./types";
 
 import { db } from "@/local-db/db";
+import type { Message } from "@ai-sdk/react";
 
 export const getModels = async (url: string): Promise<AvailableModels[]> => {
   const response = await axios.get<AvailableModels[]>(url, {
@@ -51,14 +53,14 @@ export const shareThread = async (url:string):Promise<ThreadOverview> => {
   return response.data
 }
 
-export const getChatHistory = async (url: string) => {
+export const getChatHistory = async (url: string)=> {
   const splitChatId = url.split("/");
   const chatId = splitChatId[splitChatId.length - 1];
 
   const isChatInLocal = (await db.messages.get(chatId)) || undefined;
   if (!isChatInLocal) {
     console.log("Getting chat from backend")
-    const response = await axios.get<ChatHostory>(url, {
+    const response = await axios.get<ChatHistory>(url, {
       withCredentials: true,
     });
     const chats = response.data.chats;
@@ -74,6 +76,19 @@ export const getChatHistory = async (url: string) => {
 //   console.log("Getting chat from Local DB", isChatInLocal.messages)
   return isChatInLocal.messages
 };
+
+export const getSharedChat = async(url:string): Promise<Message[]> => {
+  const response = await axios.get<ChatHistory>(url)
+  return response.data.chats
+}
+
+export const forkChat = async(url:string):Promise<string>=>{
+  const response = await axios.get<ForkThread>(url, {
+    withCredentials:true
+  })
+  return response.data.newThreadId
+}
+
 
 export const getConnectedClients = async (
   url: string

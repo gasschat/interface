@@ -26,7 +26,7 @@ export interface CurrentModel{
 
 export interface MessageProps{
   message:AIMessage;
-  isStreaming:boolean;
+  isStreaming?:boolean;
   id:string
 }
 
@@ -37,12 +37,15 @@ export interface ThreadOverview{
   updatedAt:Date
 }
 
-
 export type GetThreads = {
   threads: ThreadOverview[]
 }
 
-export type ChatHostory = {
+export interface ForkThread{
+  newThreadId:string
+}
+
+export type ChatHistory = {
   chats: Message[]
 }
 

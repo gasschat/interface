@@ -31,7 +31,7 @@ const ShareThread = ({
     `${api}/ai/publish-thread/${threadId}?isp=${!thread?.isPublic}`,
     shareThread
   );
-  const link = `localhost:5173/share/${threadId}}`;
+  const link = `localhost:5173/share/${threadId}`;
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -110,7 +110,7 @@ const ShareThread = ({
             <p 
           role="button"
           onClick={handleShareThread}
-          className="text-destructive/75 self-center cursor-pointer hover:underline text-xs text-center mr-20">Make it private</p>
+          className="text-destructive/75 self-center cursor-pointer hover:underline text-xs text-center md:mr-20">Make it private</p>
           )}
         </div>
       </DialogContent>
