@@ -24,7 +24,9 @@ import {
   } from "@/components/ui/menubar"
   
   import { signOut } from "@/lib/auth-client";
-  import { useNavigate } from "react-router";
+  import { useNavigate, useLocation } from "react-router";
+
+  import { ShareThreadBtn } from "../share-thread";
   
   export function NavbarUser({
     user,
@@ -36,6 +38,10 @@ import {
     }
   }) {
     const navigate = useNavigate();
+    const location = useLocation()
+    const currentLocation = location.pathname.split("/")
+    const isChatPage = currentLocation.length===3
+
     const handleLogout = async () => {
       await signOut({
         onSuccess: () => navigate("/login"),
@@ -44,6 +50,11 @@ import {
     };
     return (
       <Menubar className="border-0 bg-transparent p-0">
+        <MenubarMenu>
+          {isChatPage&&(
+            <ShareThreadBtn threadId={currentLocation[2]}/>
+          )}
+        </MenubarMenu>
         <MenubarMenu>
           <MenubarTrigger asChild className="rounded-full bg-transparent">
             <button
@@ -69,9 +80,9 @@ import {
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
-                  <span className="text-muted-foreground truncate text-xs">
+                  {/* <span className="text-muted-foreground truncate text-xs">
                     {user.email}
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </div>

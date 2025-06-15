@@ -33,8 +33,10 @@ export interface MessageProps{
 export interface ThreadOverview{
   id:string;
   title:string;
+  isPublic:boolean;
   updatedAt:Date
 }
+
 
 export type GetThreads = {
   threads: ThreadOverview[]

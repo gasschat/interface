@@ -44,6 +44,13 @@ export const deleteThread = async (url: string) => {
   return response.data;
 };
 
+export const shareThread = async (url:string):Promise<ThreadOverview> => {
+  const response = await axios.get<ThreadOverview>(url, {
+    withCredentials:true
+  })
+  return response.data
+}
+
 export const getChatHistory = async (url: string) => {
   const splitChatId = url.split("/");
   const chatId = splitChatId[splitChatId.length - 1];

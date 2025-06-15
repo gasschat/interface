@@ -1,7 +1,6 @@
 import { useState} from "react"
 import {
   IconDots,
-  IconShare3,
   IconTrash,
 } from "@tabler/icons-react"
 
@@ -31,6 +30,7 @@ import { api } from "@/lib/baseUrl"
 
 import { threads } from "@/lib/fetch"
 import type { ThreadOverview } from "@/lib/types"
+import { ShareThreadBtn } from "../share-thread"
 
 export function NavDocuments() {
   const [openDeleteThreadWindow, setOpenDeleteThreadWindow] = useState(false)
@@ -58,11 +58,11 @@ export function NavDocuments() {
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel className="tracking-wider">Chats</SidebarGroupLabel>
       <SidebarMenu>
-        {data?.map((thread, index) => (
+        {data?.map((thread) => (
           <SidebarMenuItem key={thread.id} className="space-y-2">
             <SidebarMenuButton asChild className={`${location.pathname.split("/")[2]===thread.id&&'bg-accent'}`}>
               <Link to={`c/${thread.id}`}>
-                <span>{index+1} {thread.title}</span>
+                <span>{thread.title}</span>
               </Link>
             </SidebarMenuButton>
             <DropdownMenu>
@@ -80,9 +80,10 @@ export function NavDocuments() {
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
-                  <IconShare3 />
-                  <span>Share</span>
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <ShareThreadBtn threadId={thread.id}/>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
