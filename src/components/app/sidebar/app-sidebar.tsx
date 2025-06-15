@@ -48,7 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               tooltip="Quick Create"
               className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
             >
-              <Link to="/c/new" className="flex items-center gap-2.5"> <IconCirclePlusFilled/> New Chat</Link>
+              <Link to="/" className="flex items-center gap-2.5"> <IconCirclePlusFilled/> New Chat</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

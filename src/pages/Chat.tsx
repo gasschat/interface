@@ -259,7 +259,7 @@ export const Chat = () => {
       status !== "streaming" &&
       !hasRevalidated.current
     ) {
-      mutate(`${api}/ai/threads`);
+      mutate(`${api}/ai/threads`).catch(console.log);
       hasRevalidated.current = true;
     }
     // Reset the flag if chatId changes or messages are cleared
