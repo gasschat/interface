@@ -5,7 +5,6 @@ import type {
   GetThreads,
   ThreadOverview,
   ChatHistory,
-  ConnectedClients,
   ForkThread,
 } from "./types";
 
@@ -53,7 +52,7 @@ export const shareThread = async (url:string):Promise<ThreadOverview> => {
   return response.data
 }
 
-export const getChatHistory = async (url: string)=> {
+export const getChatHistory = async (url: string):Promise<Message[] | []>=> {
   const splitChatId = url.split("/");
   const chatId = splitChatId[splitChatId.length - 1];
 
@@ -70,10 +69,8 @@ export const getChatHistory = async (url: string)=> {
     if(chats.length>0){
         db.messages.put({id:chatId, messages:chats}).catch(console.log)
     }
-
     return chats;
   }
-//   console.log("Getting chat from Local DB", isChatInLocal.messages)
   return isChatInLocal.messages
 };
 
@@ -88,14 +85,3 @@ export const forkChat = async(url:string):Promise<string>=>{
   })
   return response.data.newThreadId
 }
-
-
-export const getConnectedClients = async (
-  url: string
-): Promise<ConnectedClients> => {
-  const response = await axios.get<ConnectedClients>(url, {
-    withCredentials: true,
-  });
-  const cc = response.data;
-  return cc;
-};
