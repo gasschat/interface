@@ -5,9 +5,9 @@ import { ModelProvider } from "./contexts/model-provider"
 
 import { Layout } from "./pages/Layout"
 import { Home } from "./pages/Home"
-import { Chat } from "./pages/Chat"
 import Login from "./pages/Login"
 import SharedChat from "./pages/SharedChat"
+import { Chat } from "./pages/Chat"
 
 function App() {
 
