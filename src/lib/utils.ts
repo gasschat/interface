@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function extractJsonFromStream(rawData: string):Streaming|null {
+export function extractMessageFromStream(rawData: string):Streaming|null {
     try {
         const parts = rawData.split(',');
         const jsonString = parts.slice(2).join(',');
