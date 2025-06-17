@@ -17,7 +17,6 @@ import { db } from "@/local-db/db";
 
 
 
-
 // Main layout component
 export const Chat = () => {
   const { chatId } = useParams();
@@ -51,6 +50,20 @@ export const Chat = () => {
     }
   },[chatHis])
 
+  useEffect(()=>{
+    if(!chatHis) return;
+
+    if(!isLoading){
+      if(chatHis.length===2){
+        db.messages.add({messages: chatHis}, chatId).catch(console.log)
+      }
+      if(chatHis.length>2){
+        db.messages.put({id:chatId, messages:chatHis}).catch(console.log)
+      }
+    }
+    
+  },[isLoading])
+
 
   useEffect(() => {
     // if the user came from homepage append the input and subit in order to get the automtic answer
@@ -72,7 +85,7 @@ export const Chat = () => {
     }
   }, [location, isLoading, complete, navigate]);
 
-  
+
   useEffect(() => {
     if (!chatId) return;
 
@@ -121,7 +134,13 @@ export const Chat = () => {
         }
 
         // if(extractStreamText?.type==="chat_completed"){
-        //   db.messages.put({id: chatId, messages:chatHis!}).catch(console.log)
+        //   // mean curent set of chat is jsut arrived and local db have not this data saved, so usign .add
+        //   if(!chatHis && chatHis===undefined) return;
+        //   if(chatHis.length===2){
+        //     db.messages.add({messages: chatHis}, chatId).catch(console.log)
+        //     return;
+        //   }
+        //   db.messages.put({id: chatId, messages:chatHis}).catch(console.log)
         // }
 
       };
