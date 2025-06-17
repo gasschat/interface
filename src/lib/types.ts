@@ -1,4 +1,4 @@
-import type { Message as AIMessage, Message} from "@ai-sdk/react";
+import type {Message} from "@ai-sdk/react";
 
 export interface Model{
   id:string
@@ -25,7 +25,7 @@ export interface CurrentModel{
 }
 
 export interface MessageProps{
-  message:AIMessage;
+  message:Message;
   isStreaming?:boolean;
   id:string
 }
@@ -51,8 +51,4 @@ export type ChatHistory = {
 
 export type Streaming = Message & {
   type: "user_input" | "chat_streaming" | "chat_completed"
-}
-
-export interface ConnectedClients{
-  [key:string]: string
 }
