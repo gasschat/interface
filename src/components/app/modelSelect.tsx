@@ -109,7 +109,7 @@ export const ModelSelectBtn = ({
     <>
       <div role="button" onClick={() => handleOpenWindow(true)}>
         {!children ? (
-          <Button variant="ghost" size="sm" className="text-xs font-light">
+          <Button type="button" variant= "ghost" size="sm" className="text-xs font-light">
             {currentSelectedModel? currentSelectedModel.modelTitle: "Select model"}
             <ChevronDown />
           </Button>

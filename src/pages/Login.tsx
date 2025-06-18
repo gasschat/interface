@@ -6,7 +6,7 @@ export default function Login() {
   const handleGoogleLogin = async () => {
 
     await signIn.social(
-      { provider: "google", callbackURL:`/` },
+      { provider: "google", callbackURL: "https://tabs.chat"},
       {
         onError: (error) => {
           console.log(error)

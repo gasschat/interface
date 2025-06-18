@@ -18,13 +18,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import useSWRMutation from "swr/mutation";
 
 
-
 const LoginDialog = ({ open, onOpenChange }: {open:boolean, onOpenChange:(state:boolean)=>void}) => {
     const threadId = useLocation().pathname.split("/")[2]
 
     const handleGoogleLogin = async () => {
     await signIn.social(
-      { provider: "google", callbackURL:`/share/${threadId}` },
+      { provider: "google", callbackURL:`https://tabs.chat/share/${threadId}` },
       {
         onError: (error) => {
           console.log(error)

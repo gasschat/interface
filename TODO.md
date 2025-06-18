@@ -1,8 +1,0 @@
-- [ ] Add disabled tag to the user input
-- [ ] Add loading state to the assistance chat section even though it did start streaming 
-- [ ] code highlighting to the markdow
-- [ ] add styling colot tp the markdown *, 1...2..3, table etc
-- [ ] add reasoning 
-- [ ] on delte the thread and on crettign new chat refresht the threadOverfiw section for refreshed data/new added Thread overview
-- [ ] validate the chatID/threadID as Found and Valid UUID4 or returhn invalid
-- [ ] genrate a id for each chat in the server Chat.tsx 141
