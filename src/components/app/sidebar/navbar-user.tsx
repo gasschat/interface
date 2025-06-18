@@ -1,8 +1,5 @@
 import {
-    IconCreditCard,
     IconLogout,
-    IconNotification,
-    IconUserCircle,
   } from "@tabler/icons-react"
   
   import {
@@ -52,7 +49,9 @@ import {
       <Menubar className="border-0 bg-transparent p-0">
         <MenubarMenu>
           {isChatPage&&(
+            <div className="text-xs mx-3 cursor-pointer hover:underline text-secondary">
             <ShareThreadBtn threadId={currentLocation[2]}/>
+            </div>
           )}
         </MenubarMenu>
         <MenubarMenu>
@@ -61,10 +60,9 @@ import {
             type="button"
               className="data-[state=open]:bg-transparent data-[state=open]:text-gray-100 flex h-8 w-fit items-center gap-2 text-left"
             >
-              <Avatar className="h-7 w-7 rounded-[13px] ">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">HM</AvatarFallback>
-              </Avatar>
+              <div className="h-7 w-7 rounded-full border bg-gradient-to-br from-base-600 to-base-700 text-base-400 flex items-center justify-center cursor-pointer">
+                <span>{user.name[0]}</span>
+              </div>
             </button>
           </MenubarTrigger>
           <MenubarContent
@@ -75,32 +73,20 @@ import {
             <div className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-[14px]">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-[13px]">CN</AvatarFallback>
+                  <AvatarImage src={user.avatar} alt={user.name} className="rounded-full"/>
+                  <AvatarFallback className="rounded-[13px]">TC</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
-                  {/* <span className="text-muted-foreground truncate text-xs">
+                  <span className="text-muted-foreground truncate text-xs">
                     {user.email}
-                  </span> */}
+                  </span>
                 </div>
               </div>
             </div>
             <DropdownMenuSeparator />
-            <MenubarItem className="flex items-center gap-2">
-              <IconUserCircle className="size-4" />
-              Account
-            </MenubarItem>
-            <MenubarItem className="flex items-center gap-2">
-              <IconCreditCard className="size-4" />
-              Billing
-            </MenubarItem>
-            <MenubarItem className="flex items-center gap-2">
-              <IconNotification className="size-4" />
-              Notifications
-            </MenubarItem>
             <DropdownMenuSeparator />
-            <MenubarItem onClick={handleLogout} className="flex items-center gap-2" variant="destructive">
+            <MenubarItem onClick={()=>void handleLogout()} className="flex items-center gap-2" variant="destructive">
               <IconLogout className="size-4" />
               Log out
             </MenubarItem>
