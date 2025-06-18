@@ -52,9 +52,18 @@ const ShareThread = ({
       )
       .catch(console.log);
   };
-  if (isLoading) return <Loader />;
-  if (!thread) return <span>Inalid request</span>;
 
+  if(isLoading) return (
+    <Dialog open={openWindow}>
+      <DialogContent
+        className="max-h-[80vh] overflow-y-auto bg-base-900 outline-none"
+        tabIndex={-1}
+      >
+        <Loader size="sm" className="text-secondary" />
+      </DialogContent>
+      </Dialog>
+  )
+  if (!thread) return <span>Inalid request</span>;
 
   return (
     <Dialog open={openWindow}>
@@ -132,7 +141,7 @@ const ShareThreadBtn = ({ threadId }: { threadId: string }) => {
         onClick={() => handleShareThreadWindowState(true)}
         className="flex flex-row items-center gap-2 w-full"
       >
-        <IconShare3 />
+        <IconShare3 width="18"/>
         <span>Share</span>
       </div>
       {openShareThreadWindow && (
