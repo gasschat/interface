@@ -17,6 +17,7 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
 
   const navigate = useNavigate();
   const {pathname } = useLocation()
+  const isHomePage = pathname==="/"
 
 
   const handleSubmit = async(e?: FormEvent<HTMLFormElement>) => {
@@ -56,11 +57,10 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
         className="relative flex flex-col items-center"
       >
         <Textarea
-          className="w-full pt-3 pb-16 resize-none rounded-4xl border placeholder:text-base-400"
-          placeholder="Build me a..."
+          className={`w-full pt-3 pb-16 resize-none rounded-4xl border placeholder:text-base-400 max-h-72 no-scrollbar ${!isHomePage&&"backdrop-blur-3xl disabled:bg-accent-foreground"} disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed`}
+          placeholder="What is meaning is meaning of life...."
           required={true}
           onChange={pathname==="/"?(handleHomePageInputChange):(handleChatInputChange)}
-          maxLength={510}
           onKeyDown={(e: KeyboardEvent<HTMLTextAreaElement>)=>{
             handleKeyDown(e).catch(()=>console.log("error while submitting"))
           }}
