@@ -1,9 +1,9 @@
+import { useEffect} from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { useCompletion, type Message } from "@ai-sdk/react";
 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UserInput } from "@/components/app/userInput";
-import { useEffect} from "react";
 import { api } from "@/lib/baseUrl";
 
 import useSWR, {useSWRConfig} from "swr";
@@ -15,9 +15,6 @@ import { ChatMessage } from "@/components/app/ChatMessage";
 import { extractMessageFromStream } from "@/lib/utils";
 import { db } from "@/local-db/db";
 
-
-
-// Main layout component
 export const Chat = () => {
   const { chatId } = useParams();
   const location = useLocation();
@@ -50,6 +47,7 @@ export const Chat = () => {
     }
   },[chatHis])
 
+  // save the result in db
   useEffect(()=>{
     if(!chatHis) return;
 
@@ -65,6 +63,7 @@ export const Chat = () => {
   },[isLoading])
 
 
+  // users input from home screen to chat screen
   useEffect(() => {
     // if the user came from homepage append the input and subit in order to get the automtic answer
     const newState = location.state as { chat?: string } | undefined;
@@ -132,17 +131,6 @@ export const Chat = () => {
             }
           }, false).catch(console.log);
         }
-
-        // if(extractStreamText?.type==="chat_completed"){
-        //   // mean curent set of chat is jsut arrived and local db have not this data saved, so usign .add
-        //   if(!chatHis && chatHis===undefined) return;
-        //   if(chatHis.length===2){
-        //     db.messages.add({messages: chatHis}, chatId).catch(console.log)
-        //     return;
-        //   }
-        //   db.messages.put({id: chatId, messages:chatHis}).catch(console.log)
-        // }
-
       };
 
       eventSource.onerror = (error: Event) => {
@@ -169,24 +157,32 @@ export const Chat = () => {
   }, [chatId]);
 
 
-  // console.log(chatHis)
-
-
   return (
     <div className="flex items-stretch h-[calc(100vh-76px)]">
       {/* Main content */}
-      <div className={`flex-1 transition-all duration-300 max-w-full`}>
+      <div className={`flex-1 transition-all duration-300 max-w-full smooth-scroll`}>
         <div className="h-full flex flex-col">
           <ScrollArea className="flex-1 h-[26rem] w-full">
             {chatHis?.map((message) => (
               <ChatMessage key={message.id} id={message.id} message={message} />
             ))}
+            <span className="block h-3 w-full"></span>
+            <span className="block h-3 w-full"></span>
+            <span className="block h-3 w-full"></span>
+            <span className="block h-3 w-full"></span>
+            <span className="block h-3 w-full"></span>
+            <span className="block h-3 w-full"></span>
+            <span className="block h-3 w-full"></span>
+            <span className="block h-3 w-full"></span>
+            <span className="block h-3 w-full"></span>
+            <span className="block h-3 w-full"></span>
+            <span className="block h-3 w-full"></span>
 
             <ScrollBar orientation="vertical" />
           </ScrollArea>
 
-          <div className="py-2 px-3">
-            <div className="w-full max-w-xl place-self-center">
+          <div className="py-2 px-3 absolute bottom-0 w-full">
+            <div className="w-full max-w-xl place-self-center ">
               <UserInput
                 disable={isFetchingChatHistory || isLoading}
                 handleChatSubmit={handleSubmit}
