@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader as Loader, XIcon } from "lucide-react";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
 
 import { useCompletion } from "@ai-sdk/react";
 import { api } from "@/lib/baseUrl";
@@ -135,7 +135,7 @@ const APIKeysDialog = ({
   );
 };
 
-export const ApiKeysDialogBtn = () => {
+export const ApiKeysDialogBtn = ({ children }: { children: ReactNode }) => {
   const [openDialogWondow, setOpenDialogWindow] = useState(false);
 
   const handleDialogWindowState = (state: boolean) => {
@@ -144,13 +144,12 @@ export const ApiKeysDialogBtn = () => {
 
   return (
     <>
-      <Button
+      <div
+      role="button"
         onClick={() => handleDialogWindowState(true)}
-        variant="outline"
-        className="rounded-2xl"
       >
-        API Key
-      </Button>
+        {children}
+      </div>
       <APIKeysDialog
         openWindow={openDialogWondow}
         windowState={handleDialogWindowState}

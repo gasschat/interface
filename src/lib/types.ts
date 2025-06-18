@@ -22,6 +22,7 @@ export interface AvailableModels{
 export interface CurrentModel{
   llm:string
   model:string
+  modelTitle:string
 }
 
 export interface MessageProps{

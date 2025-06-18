@@ -9,7 +9,7 @@ export function Home() {
 
   useEffect(() => {
     if (!isPending && !session?.user) {
-      navigate("/login");
+      void navigate("/login");
     }
   }, [isPending, session, navigate]);
 

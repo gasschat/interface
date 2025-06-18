@@ -24,7 +24,7 @@ const LoginDialog = ({ open, onOpenChange }: {open:boolean, onOpenChange:(state:
 
     const handleGoogleLogin = async () => {
     await signIn.social(
-      { provider: "google", callbackURL:`http://localhost:5173/share/${threadId}` },
+      { provider: "google", callbackURL:`/share/${threadId}` },
       {
         onError: (error) => {
           console.log(error)

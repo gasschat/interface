@@ -1,4 +1,6 @@
 import { Routes, Route } from "react-router"
+import { Toaster } from "@/components/ui/sonner"
+
 
 import { ThemeProvider } from "./contexts/theme-provider"
 import { ModelProvider } from "./contexts/model-provider"
@@ -23,7 +25,7 @@ function App() {
         <Route path="/share/:chatId" element={<SharedChat/>}/> 
       </Routes>
       </ModelProvider>
-
+      <Toaster richColors/>
     </ThemeProvider>
   )
 }

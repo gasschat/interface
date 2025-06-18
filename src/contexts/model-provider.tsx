@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react"
+import { createContext, useEffect, useState, type ReactNode } from "react"
 import useSWR from 'swr'
 
 import { api } from "@/lib/baseUrl";
@@ -7,9 +7,6 @@ import { getModels } from "@/lib/fetch";
 
 import type { AvailableModels, CurrentModel } from "@/lib/types"
 
-type ModelProviderProps = {
-    children: React.ReactNode
-}
 
 type ModelProviderState = {
     currentModel:CurrentModel|null;
@@ -20,7 +17,7 @@ type ModelProviderState = {
 // eslint-disable-next-line react-refresh/only-export-components
 export const ModelContextProvider = createContext<ModelProviderState|undefined>(undefined)
 
-export function ModelProvider({children}:ModelProviderProps){
+export function ModelProvider({children}:{children: ReactNode}){
     const [currentModel, setCurrentModel] = useState<CurrentModel | null>(null)
       const { data } = useSWR<AvailableModels[]>(`${api}/ai/models`, getModels)
 
@@ -38,6 +35,7 @@ export function ModelProvider({children}:ModelProviderProps){
         localStorage.setItem('selected-model', selectedModel)
         setCurrentModel(model)
     }
+
 
     const value =  {  
          currentModel,

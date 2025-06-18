@@ -19,6 +19,7 @@ import {
 import { Link } from "react-router"
 
 import { ApiKeysDialogBtn } from "../ApiKeyDialog"
+import { Button } from "@/components/ui/button"
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -57,7 +58,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavDocuments />
       </SidebarContent>
       <SidebarFooter className="border-t">
-        <ApiKeysDialogBtn/>
+        <ApiKeysDialogBtn>
+          <Button variant="outline" className="w-full">Api Key</Button>
+        </ApiKeysDialogBtn>
       </SidebarFooter>
     </Sidebar>
   )

@@ -1,19 +1,69 @@
 import { useState } from "react";
 import type { KeyboardEvent, ChangeEvent, FormEvent } from "react";
-import { Send, ChevronDown } from "lucide-react";
-
-import { Textarea } from "@/components/ui/textarea";
-import { ModelSelect } from "./modelSelect";
 
 import { useLocation, useNavigate } from "react-router";
-import { useModel } from "@/hooks/use-model";
-
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "sonner";
+import { Send, } from "lucide-react";
 
-const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}:{handleChatSubmit?:()=>void, handleChatInputChange?:(e: ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLInputElement>)=>void, chatInput?:string, disable:boolean}) => {
-  const [openModelSelectorWindow, setOpenModelSelectorWindow] = useState(false);
+import { Textarea } from "@/components/ui/textarea";
+import { ModelSelectBtn } from "./modelSelect";
+import { ApiKeysDialogBtn } from "./ApiKeyDialog";
+
+import { getOrAPIKey, getUserSelectedModel } from "@/lib/utils";
+
+
+const ApiKeyToast = ({ t }: { t: string | number }) => (
+  <div className="relative bg-destructive/35 border-destructive text-destructive p-1.5 rounded-lg shadow-lg border">
+    <button 
+    type="button"
+      onClick={() => toast.dismiss(t)}
+      className="absolute top-2 right-2 "
+    >
+      ✕
+    </button>
+    
+    <div className="flex flex-row mt-2">
+      <h3 className="text-xs font-medium mb-4 pr-6">
+      Add your Open Router API Key
+    </h3>
+    
+    <ApiKeysDialogBtn>
+<button type="button" className="bg-accent-foreground text-accent ">
+      Add
+    </button>
+    </ApiKeysDialogBtn>
+    </div>
+  </div>
+);
+
+const SelectedModelToast = ({ t }: { t: string | number }) => (
+  <div className="relative bg-destructive/35 border-destructive text-destructive p-1.5 rounded-lg shadow-lg border">
+    <button 
+    type="button"
+      onClick={() => toast.dismiss(t)}
+      className="absolute top-2 right-2 "
+    >
+      ✕
+    </button>
+    
+    <div className="flex flex-row mt-2">
+      <h3 className="text-xs font-medium mb-4 pr-6">
+      Select Your Model
+    </h3>
+    
+    <ModelSelectBtn>
+<button type="button" className="bg-accent-foreground text-accent ">
+      Select
+    </button>
+    </ModelSelectBtn>
+    </div>
+  </div>
+);
+
+const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}:{handleChatSubmit?:()=>void, handleChatInputChange?:(e: ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLInputElement>)=>void, chatInput?:string, disable?:boolean}) => {
   const [homePageInput, setHomePageInput] = useState<string>("")
-  const {currentModel} = useModel()
+
 
   const navigate = useNavigate();
   const {pathname } = useLocation()
@@ -22,6 +72,23 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
 
   const handleSubmit = async(e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
+
+    const kk = getOrAPIKey()
+    if(!kk) {
+      toast.custom((t) => (
+      <ApiKeyToast t={t} />
+    ), {position:"top-center", duration:6000})
+    return;
+  }
+
+    const isUserModelSelected = getUserSelectedModel()
+    if(!isUserModelSelected){
+      toast.custom((t) => (
+      <SelectedModelToast t={t} />
+    ), {position:"top-center", duration:6000})
+    return;
+  }
+
     if(pathname==="/"){
       const getUUID = (uuidv4 as () => string)()
       await navigate(`c/${getUUID}`, {
@@ -42,10 +109,6 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
   const handleHomePageInputChange = (e:ChangeEvent<HTMLTextAreaElement>) => {
     setHomePageInput(e.target.value)
   }
-
-  const handleOpenModelSelectorWindowState = () => {
-    return setOpenModelSelectorWindow(!openModelSelectorWindow);
-  };
 
 
   return (
@@ -71,19 +134,7 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
         <div className="relative flex flex-row items-center justify-center w-full">
           {/* <button type='button' className='text-xs font-medium px-1 hover:bg-accent/60 absolute left-3 bottom-3'>Select model </button> */}
           <div className="absolute left-3 bottom-3">
-            <button
-              type="button"
-              onClick={handleOpenModelSelectorWindowState}
-              className="text-xs p-1 hover:gray-200 dark:hover:bg-neutral-800 cursor-pointer rounded-[13px] flex flex-row items-center gap-1"
-            >
-              {!currentModel?"Select model":currentModel.model} <ChevronDown width="18" />
-            </button>
-            {openModelSelectorWindow && (
-              <ModelSelect
-                openWindow={openModelSelectorWindow}
-                handleOpenWindow={handleOpenModelSelectorWindowState}
-              />
-            )}
+            <ModelSelectBtn/>
           </div>
           <button
             type="submit"

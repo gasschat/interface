@@ -6,7 +6,7 @@ export default function Login() {
   const handleGoogleLogin = async () => {
 
     await signIn.social(
-      { provider: "google", callbackURL:`http://localhost:5173` },
+      { provider: "google", callbackURL:`/` },
       {
         onError: (error) => {
           console.log(error)

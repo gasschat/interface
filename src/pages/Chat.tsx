@@ -12,14 +12,17 @@ import useSWR, {useSWRConfig} from "swr";
 import { getChatHistory } from "@/lib/fetch";
 
 import { ChatMessage } from "@/components/app/ChatMessage";
-import { extractMessageFromStream } from "@/lib/utils";
+import { extractMessageFromStream, getOrAPIKey, getUserSelectedModel } from "@/lib/utils";
 import { db } from "@/local-db/db";
+import { toast } from "sonner";
 
 export const Chat = () => {
   const { chatId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { mutate: mutateTitle } = useSWRConfig()
+  const currentModel = getUserSelectedModel()
+  const localApiKey = getOrAPIKey()
 
   const { data: chatHis, isLoading: isFetchingChatHistory, mutate } = useSWR<Message[]>(
     `${api}/ai/thread/${chatId}`,
@@ -35,7 +38,12 @@ export const Chat = () => {
       credentials: "include",
       body: {
         messages: chatHis,
-        chatId:chatId
+        chatId:chatId,
+        apiKey:localApiKey,
+        model: currentModel?.model || "google/gemini-2.0-flash-exp:free"
+      },
+      onError:()=>{
+        toast.error("Make sure your API is Correct and have credits")
       }
     });
 
@@ -45,7 +53,7 @@ export const Chat = () => {
     if(chatHis&&chatHis.length===2){
       mutateTitle(`${api}/ai/threads`).catch(console.log)
     }
-  },[chatHis])
+  },[chatHis, mutateTitle])
 
   // save the result in db
   useEffect(()=>{
@@ -60,7 +68,7 @@ export const Chat = () => {
       }
     }
     
-  },[isLoading])
+  },[isLoading, chatHis, chatId])
 
 
   // users input from home screen to chat screen
@@ -86,8 +94,7 @@ export const Chat = () => {
 
 
   useEffect(() => {
-    if (!chatId) return;
-
+    if(!chatId) return;
     let eventSource: EventSource | null = null;
     let shouldReconnect = true;
 
@@ -154,15 +161,16 @@ export const Chat = () => {
       shouldReconnect = false;
       if (eventSource) eventSource.close();
     };
-  }, [chatId]);
+  }, [chatId, mutate]);
 
 
   return (
     <div className="flex items-stretch h-[calc(100vh-76px)]">
       {/* Main content */}
-      <div className={`flex-1 transition-all duration-300 max-w-full smooth-scroll`}>
+      <div className={`flex-1 transition-all duration-300 max-w-full `}>
         <div className="h-full flex flex-col">
-          <ScrollArea className="flex-1 h-[26rem] w-full">
+          <ScrollArea className="flex-1 h-[26rem] w-full smooth-scroll">
+            <span className="block h-3 w-full mt-9"></span>
             {chatHis?.map((message) => (
               <ChatMessage key={message.id} id={message.id} message={message} />
             ))}
