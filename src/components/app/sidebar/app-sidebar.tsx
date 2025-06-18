@@ -18,8 +18,7 @@ import {
 
 import { Link } from "react-router"
 
-// import { useUserProvider } from "@/context/user-provider";
-import { Button } from "@/components/ui/button"
+import { ApiKeysDialogBtn } from "../ApiKeyDialog"
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -36,7 +35,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <Link to="/">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Gass</span>
+                <span className="text-base font-semibold">Tabs </span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -58,7 +57,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavDocuments />
       </SidebarContent>
       <SidebarFooter className="border-t">
-        <Button variant="outline" className="rounded-[20px]">Settings</Button>
+        <ApiKeysDialogBtn/>
       </SidebarFooter>
     </Sidebar>
   )
