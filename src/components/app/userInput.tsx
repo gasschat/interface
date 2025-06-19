@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ModelSelectBtn } from "./modelSelect";
 import { ApiKeysDialogBtn } from "./ApiKeyDialog";
 
-import { getOrAPIKey, getUserSelectedModel } from "@/lib/utils";
+import { getSelectedModel } from "@/lib/utils";
+import { getApiKey } from "@/lib/utils";
 
 
 const ApiKeyToast = ({ t }: { t: string | number }) => (
@@ -73,21 +74,20 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
   const handleSubmit = async(e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
 
-    const kk = getOrAPIKey()
-    if(!kk) {
-      toast.custom((t) => (
-      <ApiKeyToast t={t} />
-    ), {position:"top-center", duration:6000})
-    return;
-  }
-
-    const isUserModelSelected = getUserSelectedModel()
-    if(!isUserModelSelected){
-      toast.custom((t) => (
+    const isModelSelected = getSelectedModel()
+    if(!isModelSelected){
+       return toast.custom((t) => (
       <SelectedModelToast t={t} />
     ), {position:"top-center", duration:6000})
-    return;
-  }
+    }
+
+    const isApiKey = getApiKey(isModelSelected.llm)
+    if(!isApiKey){
+    return toast.custom((t) => (
+      <ApiKeyToast t={t} />
+    ), {position:"top-center", duration:6000})
+    }
+
 
     if(pathname==="/"){
       const getUUID = (uuidv4 as () => string)()
