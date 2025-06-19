@@ -14,7 +14,7 @@ import { getSelectedModel } from "@/lib/utils";
 import { LLMProviderIcons } from "@/lib/utils";
 
 
-const ModelSelect = ({
+export const ModelSelect = ({
   openWindow,
   handleOpenWindow,
 }: {

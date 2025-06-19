@@ -76,7 +76,7 @@ const ApiInput = ({ llmTitle, llmName}: { llmTitle:string, llmName: string }) =>
   );
 };
 
-const APIKeysDialog = ({
+export const APIKeysDialog = ({
   openWindow,
   windowState,
 }: {
