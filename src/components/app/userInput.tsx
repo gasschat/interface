@@ -29,6 +29,8 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
   const handleSubmit = async(e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
 
+    if(disable) return
+
     const isModelSelected = getSelectedModel()
     if(!isModelSelected){
       toast.error("Please select your model.",{
@@ -79,7 +81,7 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
         className="relative flex flex-col items-center"
       >
         <Textarea
-          className={`w-full pt-3 pb-16 resize-none rounded-4xl border placeholder:text-base-400 max-h-72 no-scrollbar ${!isHomePage&&"backdrop-blur-3xl disabled:bg-accent-foreground"} disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed`}
+          className={`w-full pt-3 pb-16 resize-none rounded-4xl border placeholder:text-base-400 max-h-72 no-scrollbar ${!isHomePage&&"backdrop-blur-3xl"}  ${disable&&'!cursor-not-allowed'}`}
           placeholder="What is meaning is meaning of life...."
           required={true}
           onChange={pathname==="/"?(handleHomePageInputChange):(handleChatInputChange)}
@@ -88,7 +90,6 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
           }}
           value={pathname==="/"?(homePageInput):(chatInput)}
           name="userInput"
-          disabled={disable}
         />
         <div className="relative flex flex-row items-center justify-center w-full">
           {/* <button type='button' className='text-xs font-medium px-1 hover:bg-accent/60 absolute left-3 bottom-3'>Select model </button> */}
