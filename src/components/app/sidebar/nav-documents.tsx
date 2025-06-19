@@ -3,6 +3,7 @@ import {
   IconDots,
   IconTrash,
 } from "@tabler/icons-react"
+import { Loader } from "lucide-react"
 
 import {
   DropdownMenu,
@@ -52,7 +53,11 @@ export function NavDocuments() {
   }
 
 
-  if(isLoading) return <div className="block w-7 h-6 rounded-full border animate-spin"></div>
+  if(isLoading) return (
+    <div className="flex items-center justify-center h-full w-full">
+      <Loader className="animate-spin w-8 h-8 text-muted-foreground" />
+    </div>
+  )
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">

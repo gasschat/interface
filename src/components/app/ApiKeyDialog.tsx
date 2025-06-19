@@ -85,7 +85,7 @@ export const APIKeysDialog = ({
 }) => {
   const { data: llms} = useSWR<AvailableModels[]>(`${api}/ai/models`, getModels)
 
-  if(!llms) return <div>Loading....</div>
+  if(!llms) return null;
 
   return (
     <Dialog open={openWindow}>

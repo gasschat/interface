@@ -42,7 +42,7 @@ export const ModelSelect = ({
   };
 
 
-  if (!models) return <span>Loading...</span>;
+  if (!models) return null;
 
   return (
     <Dialog open={openWindow} onOpenChange={handleOpenWindow}>
