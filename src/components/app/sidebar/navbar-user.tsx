@@ -52,8 +52,8 @@ export function NavbarUser({
             type="button"
             className="data-[state=open]:bg-transparent data-[state=open]:text-gray-100 flex h-8 w-fit items-center gap-2 text-left"
           >
-            <div className="h-7 w-7 rounded-full border bg-gradient-to-br from-base-600 to-base-700 text-base-400 flex items-center justify-center cursor-pointer">
-              <span>{user.name[0]}</span>
+            <div className="h-6 w-6 rounded-full border bg-gradient-to-br from-sky-400 via-blue-400 to-indigo-400 text-base-800 flex items-center justify-center cursor-pointer">
+              {/* <span>{user.name[0]}</span> */}
             </div>
           </button>
         </MenubarTrigger>
@@ -81,7 +81,7 @@ export function NavbarUser({
             </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuSeparator />
+          {/* <DropdownMenuSeparator /> */}
           <MenubarItem
             onClick={() => void handleLogout()}
             className="flex items-center gap-2"
