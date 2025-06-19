@@ -3,7 +3,6 @@ import { Toaster } from "@/components/ui/sonner"
 
 
 import { ThemeProvider } from "./contexts/theme-provider"
-import { ModelProvider } from "./contexts/model-provider"
 
 import { Layout } from "./pages/Layout"
 import { Home } from "./pages/Home"
@@ -15,7 +14,6 @@ function App() {
 
   return (
     <ThemeProvider>
-      <ModelProvider>
         <Routes>
           <Route path="/login" element={<Login/>} />
         <Route path="/" element={<Layout />}>
@@ -24,7 +22,6 @@ function App() {
         </Route>
         <Route path="/share/:chatId" element={<SharedChat/>}/> 
       </Routes>
-      </ModelProvider>
       <Toaster richColors/>
     </ThemeProvider>
   )
