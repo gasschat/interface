@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -209,4 +210,9 @@ no-scrollbar::-webkit-scrollbar {
 
 .smooth-scroll [data-radix-scroll-area-viewport] {
   scroll-behavior: smooth;
+}
+
+code[class*="language-"],
+pre[class*="language-"] {
+  font-family: 'Inconsolata', monospace !important;
 }

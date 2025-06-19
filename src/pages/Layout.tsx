@@ -5,6 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { useSession } from "@/lib/auth-client";
 import { useNavigate } from "react-router";
 import { useEffect } from "react";
+import { Loader } from "lucide-react";
 
 export  function Layout() {
   const { data: session, isPending } = useSession();
@@ -16,7 +17,11 @@ export  function Layout() {
     }
   }, [isPending, session, navigate]);
 
-  if (!session?.user) return null;
+  if (!session?.user) return (
+    <div className="fixed inset-0 flex items-center justify-center bg-background z-50">
+      <Loader className="animate-spin w-10 h-10 text-primary" />
+    </div>
+  );
 
   return (
     <SidebarProvider>

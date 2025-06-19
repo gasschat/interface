@@ -29,8 +29,11 @@ export const Chat = () => {
   const apiKey = getApiKey(selectedModel?.llm || "")
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const searchParams = new URLSearchParams(location.search);
+  const isNewChat = searchParams.get('q') === 'new';
+
   const { data: chatHis, isLoading: isFetchingChatHistory, mutate } = useSWR<Message[]>(
-    `${api}/ai/thread/${chatId}`,
+    !isNewChat ? `${api}/ai/thread/${chatId}` : null,
     getChatHistory, {
       shouldRetryOnError:false,
       fallbackData: [] //initialized it with empty array
@@ -189,7 +192,7 @@ export const Chat = () => {
     handleSubmit()
   }
 
-  if(isFetchingChatHistory) return <ChatMessageSkeletonLoader/>
+  if(isFetchingChatHistory && !isNewChat) return <ChatMessageSkeletonLoader/>
 
 
   return (

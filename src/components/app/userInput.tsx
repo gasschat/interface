@@ -50,9 +50,11 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
     }
 
 
+
+    // we are adding q=new to avoid swr fetching on first attempt we know tere is no chat so no need to fetch the chat hinstory
     if(pathname==="/"){
       const getUUID = (uuidv4 as () => string)()
-      await navigate(`c/${getUUID}`, {
+      await navigate(`c/${getUUID}?q=new`, {
         state: {chat: homePageInput}
       })
     }
