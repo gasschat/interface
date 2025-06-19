@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 import { getSelectedModel } from "@/lib/utils";
 import { getApiKey } from "@/lib/utils";
-// import { ChatMessageSkeletonLoader } from "@/components/app/chat-message-skeleton";
+import { ChatMessageSkeletonLoader } from "@/components/app/chat-message-skeleton";
 
 export const Chat = () => {
   const { chatId } = useParams();
@@ -29,8 +29,6 @@ export const Chat = () => {
   const apiKey = getApiKey(selectedModel?.llm || "")
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // const searchParams = new URLSearchParams(location.search);
-  // const isNewChat = searchParams.get('q') === 'new';
 
   const { data: chatHis, isLoading: isFetchingChatHistory, mutate } = useSWR<Message[]>(
     `${api}/ai/thread/${chatId}`,
@@ -192,7 +190,7 @@ export const Chat = () => {
     handleSubmit()
   }
 
-  // if( !isNewChat && isFetchingChatHistory) return <ChatMessageSkeletonLoader/>
+  if( isFetchingChatHistory) return <ChatMessageSkeletonLoader/>
 
 
   return (

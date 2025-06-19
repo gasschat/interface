@@ -68,18 +68,6 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ children, className }) => {
   );
 };
 
-// Custom inline code component
-interface InlineCodeProps {
-  children: React.ReactNode;
-}
-
-const InlineCode: React.FC<InlineCodeProps> = ({ children }) => {
-  return (
-    <code className="bg-gray-800 text-gray-200 px-1.5 py-0.5 rounded text-sm font-mono">
-      {children}
-    </code>
-  );
-};
 
 interface MarkdownCodeProps {
   inline?: boolean;
@@ -193,13 +181,9 @@ export const ChatMessage = ({ id, message, isStreaming }: MessageProps) => {
                     </td>
                   ),
                   code: (({
-                    inline,
                     className,
                     children,
                   }: MarkdownCodeProps) => {
-                    if (inline) {
-                      return <InlineCode>{children}</InlineCode>;
-                    }
                     return (
                       <CodeBlock className={className}>
                         {String(children as string).replace(/\n$/, "")}
@@ -211,7 +195,9 @@ export const ChatMessage = ({ id, message, isStreaming }: MessageProps) => {
                 {message.content}
               </Markdown>
               {isStreaming && (
-                <span className="block h-2 w-2 bg-accent-foreground"></span>
+                <div className="flex items-center gap-1 mt-2">
+                  <span className="block w-4 h-5 bg-transparent text-accent-foreground font-mono text-lg animate-pulse">||||</span>
+                </div>
               )}
               {!isStreaming && (
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
