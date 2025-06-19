@@ -7,63 +7,18 @@ import { toast } from "sonner";
 import { Send, } from "lucide-react";
 
 import { Textarea } from "@/components/ui/textarea";
-import { ModelSelectBtn } from "./modelSelect";
-import { ApiKeysDialogBtn } from "./ApiKeyDialog";
+import { ModelSelect, ModelSelectBtn } from "./modelSelect";
+import { APIKeysDialog} from "./ApiKeyDialog";
 
 import { getSelectedModel } from "@/lib/utils";
 import { getApiKey } from "@/lib/utils";
 
 
-const ApiKeyToast = ({ t }: { t: string | number }) => (
-  <div className="relative bg-destructive/35 border-destructive text-destructive p-1.5 rounded-lg shadow-lg border">
-    <button 
-    type="button"
-      onClick={() => toast.dismiss(t)}
-      className="absolute top-2 right-2 "
-    >
-      ✕
-    </button>
-    
-    <div className="flex flex-row mt-2">
-      <h3 className="text-xs font-medium mb-4 pr-6">
-      Add your Open Router API Key
-    </h3>
-    
-    <ApiKeysDialogBtn>
-<button type="button" className="bg-accent-foreground text-accent ">
-      Add
-    </button>
-    </ApiKeysDialogBtn>
-    </div>
-  </div>
-);
-
-const SelectedModelToast = ({ t }: { t: string | number }) => (
-  <div className="relative bg-destructive/35 border-destructive text-destructive p-1.5 rounded-lg shadow-lg border">
-    <button 
-    type="button"
-      onClick={() => toast.dismiss(t)}
-      className="absolute top-2 right-2 "
-    >
-      ✕
-    </button>
-    
-    <div className="flex flex-row mt-2">
-      <h3 className="text-xs font-medium mb-4 pr-6">
-      Select Your Model
-    </h3>
-    
-    <ModelSelectBtn>
-<button type="button" className="bg-accent-foreground text-accent ">
-      Select
-    </button>
-    </ModelSelectBtn>
-    </div>
-  </div>
-);
 
 const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}:{handleChatSubmit?:()=>void, handleChatInputChange?:(e: ChangeEvent<HTMLTextAreaElement> | ChangeEvent<HTMLInputElement>)=>void, chatInput?:string, disable?:boolean}) => {
   const [homePageInput, setHomePageInput] = useState<string>("")
+  const [isApiDialogueShouldOpen, setIsApiDialogueShouldOpen] = useState(false)
+  const [isModelDialogueShouldOpen, setIsModelDialogueShouldOpen] = useState(false)
 
 
   const navigate = useNavigate();
@@ -76,16 +31,20 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
 
     const isModelSelected = getSelectedModel()
     if(!isModelSelected){
-       return toast.custom((t) => (
-      <SelectedModelToast t={t} />
-    ), {position:"top-center", duration:6000})
+      toast.error("Please select your model.",{
+        position:"top-center"
+      })
+      setIsModelDialogueShouldOpen(true)
+      return;
     }
 
     const isApiKey = getApiKey(isModelSelected.llm)
     if(!isApiKey){
-    return toast.custom((t) => (
-      <ApiKeyToast t={t} />
-    ), {position:"top-center", duration:6000})
+      toast.error(`Please add your ${isModelSelected.llm} API key`,{
+        position:"top-center"
+      })
+      setIsApiDialogueShouldOpen(true)
+      return;
     }
 
 
@@ -144,6 +103,8 @@ const UserInput = ({handleChatSubmit, handleChatInputChange, chatInput, disable}
           </button>
         </div>
       </form>
+      <ModelSelect openWindow={isModelDialogueShouldOpen} handleOpenWindow={()=>setIsModelDialogueShouldOpen(false)}/>
+      <APIKeysDialog openWindow={isApiDialogueShouldOpen} windowState={setIsApiDialogueShouldOpen}/>
     </>
   );
 };
