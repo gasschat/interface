@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 import { getSelectedModel } from "@/lib/utils";
 import { getApiKey } from "@/lib/utils";
-import { ChatMessageSkeletonLoader } from "@/components/app/chat-message-skeleton";
+// import { ChatMessageSkeletonLoader } from "@/components/app/chat-message-skeleton";
 
 export const Chat = () => {
   const { chatId } = useParams();
@@ -29,11 +29,11 @@ export const Chat = () => {
   const apiKey = getApiKey(selectedModel?.llm || "")
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const searchParams = new URLSearchParams(location.search);
-  const isNewChat = searchParams.get('q') === 'new';
+  // const searchParams = new URLSearchParams(location.search);
+  // const isNewChat = searchParams.get('q') === 'new';
 
   const { data: chatHis, isLoading: isFetchingChatHistory, mutate } = useSWR<Message[]>(
-    !isNewChat ? `${api}/ai/thread/${chatId}` : null,
+    `${api}/ai/thread/${chatId}`,
     getChatHistory, {
       shouldRetryOnError:false,
       fallbackData: [] //initialized it with empty array
@@ -192,7 +192,7 @@ export const Chat = () => {
     handleSubmit()
   }
 
-  if(isFetchingChatHistory && !isNewChat) return <ChatMessageSkeletonLoader/>
+  // if( !isNewChat && isFetchingChatHistory) return <ChatMessageSkeletonLoader/>
 
 
   return (
@@ -202,8 +202,15 @@ export const Chat = () => {
         <div className="h-full flex flex-col">
           <ScrollArea className="flex-1 h-[26rem] w-full smooth-scroll">
             <span className="block h-3 w-full mt-9"></span>
-            {chatHis?.map((message) => (
-              <ChatMessage key={message.id} id={message.id} message={message} />
+            {chatHis?.map((message, idx) => (
+              <ChatMessage
+                key={message.id}
+                id={message.id}
+                message={message}
+                isStreaming={
+                  isLoading && idx === chatHis.length - 1 && String(chatId) === String(message.id.split('-')[0])
+                }
+              />
             ))}
             <div ref={messagesEndRef} />
             <span className="block h-32 w-full"></span>
