@@ -25,7 +25,7 @@ export const Chat = () => {
   const navigate = useNavigate();
   const { mutate: mutateTitle } = useSWRConfig()
   const selectedModel = getSelectedModel()
-  const apiKey = getApiKey(selectedModel!.llm)
+  const apiKey = getApiKey(selectedModel?.llm || "")
 
   const { data: chatHis, isLoading: isFetchingChatHistory, mutate } = useSWR<Message[]>(
     `${api}/ai/thread/${chatId}`,
@@ -42,13 +42,13 @@ export const Chat = () => {
       body: {
         messages: chatHis,
         chatId:chatId,
-        llm:selectedModel!.llm,
+        llm:selectedModel?.llm,
         apiKey:apiKey,
-        model:selectedModel!.model
+        model:selectedModel?.model
       },
 
       onError:()=>{
-        toast.error("Make sure your API is Correct and have credits and permissions ")
+        toast.warning("Make sure your API is Correct and have credits with permissions ")
       }
     });
 
