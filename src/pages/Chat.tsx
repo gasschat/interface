@@ -12,17 +12,20 @@ import useSWR, {useSWRConfig} from "swr";
 import { getChatHistory } from "@/lib/fetch";
 
 import { ChatMessage } from "@/components/app/ChatMessage";
-import { extractMessageFromStream, getOrAPIKey, getUserSelectedModel } from "@/lib/utils";
+import { extractMessageFromStream } from "@/lib/utils";
 import { db } from "@/local-db/db";
 import { toast } from "sonner";
+
+import { getSelectedModel } from "@/lib/utils";
+import { getApiKey } from "@/lib/utils";
 
 export const Chat = () => {
   const { chatId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { mutate: mutateTitle } = useSWRConfig()
-  const currentModel = getUserSelectedModel()
-  const localApiKey = getOrAPIKey()
+  const selectedModel = getSelectedModel()
+  const apiKey = getApiKey(selectedModel!.llm)
 
   const { data: chatHis, isLoading: isFetchingChatHistory, mutate } = useSWR<Message[]>(
     `${api}/ai/thread/${chatId}`,
@@ -39,11 +42,13 @@ export const Chat = () => {
       body: {
         messages: chatHis,
         chatId:chatId,
-        apiKey:localApiKey,
-        model: currentModel?.model || "google/gemini-2.0-flash-exp:free"
+        llm:selectedModel!.llm,
+        apiKey:apiKey,
+        model:selectedModel!.model
       },
+
       onError:()=>{
-        toast.error("Make sure your API is Correct and have credits")
+        toast.error("Make sure your API is Correct and have credits and permissions ")
       }
     });
 
