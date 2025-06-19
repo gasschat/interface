@@ -1,4 +1,4 @@
-import { useEffect} from "react";
+import { useEffect, useRef} from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import { useCompletion, type Message } from "@ai-sdk/react";
 
@@ -18,6 +18,7 @@ import { toast } from "sonner";
 
 import { getSelectedModel } from "@/lib/utils";
 import { getApiKey } from "@/lib/utils";
+import { ChatMessageSkeletonLoader } from "@/components/app/chat-message-skeleton";
 
 export const Chat = () => {
   const { chatId } = useParams();
@@ -26,6 +27,7 @@ export const Chat = () => {
   const { mutate: mutateTitle } = useSWRConfig()
   const selectedModel = getSelectedModel()
   const apiKey = getApiKey(selectedModel?.llm || "")
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data: chatHis, isLoading: isFetchingChatHistory, mutate } = useSWR<Message[]>(
     `${api}/ai/thread/${chatId}`,
@@ -34,7 +36,7 @@ export const Chat = () => {
       fallbackData: [] //initialized it with empty array
     }
   );
-  const { complete, input, handleInputChange, handleSubmit, isLoading } =
+  const { complete, input, handleInputChange, handleSubmit, isLoading, setInput} =
     useCompletion({
       streamProtocol: "data",
       api: `${api}/ai/completion`,
@@ -46,7 +48,6 @@ export const Chat = () => {
         apiKey:apiKey,
         model:selectedModel?.model
       },
-
       onError:()=>{
         toast.warning("Make sure your API is Correct and have credits with permissions ")
       }
@@ -169,6 +170,28 @@ export const Chat = () => {
   }, [chatId, mutate]);
 
 
+  // scroll to the latest user input
+  useEffect(() => {
+  if (chatHis && chatHis.length > 0) {
+    const lastMessage = chatHis[chatHis.length - 1];
+    if (lastMessage.role === 'user' || (lastMessage.role === 'assistant' && isLoading)) {
+      scrollToBottom();
+    }
+  }
+}, [chatHis, isLoading]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const onHandleSubmit = () => {
+    setInput("")
+    handleSubmit()
+  }
+
+  if(isFetchingChatHistory) return <ChatMessageSkeletonLoader/>
+
+
   return (
     <div className="flex items-stretch h-[calc(100vh-76px)]">
       {/* Main content */}
@@ -179,18 +202,8 @@ export const Chat = () => {
             {chatHis?.map((message) => (
               <ChatMessage key={message.id} id={message.id} message={message} />
             ))}
-            <span className="block h-3 w-full"></span>
-            <span className="block h-3 w-full"></span>
-            <span className="block h-3 w-full"></span>
-            <span className="block h-3 w-full"></span>
-            <span className="block h-3 w-full"></span>
-            <span className="block h-3 w-full"></span>
-            <span className="block h-3 w-full"></span>
-            <span className="block h-3 w-full"></span>
-            <span className="block h-3 w-full"></span>
-            <span className="block h-3 w-full"></span>
-            <span className="block h-3 w-full"></span>
-
+            <div ref={messagesEndRef} />
+            <span className="block h-32 w-full"></span>
             <ScrollBar orientation="vertical" />
           </ScrollArea>
 
@@ -198,7 +211,7 @@ export const Chat = () => {
             <div className="w-full max-w-xl place-self-center ">
               <UserInput
                 disable={isFetchingChatHistory || isLoading}
-                handleChatSubmit={handleSubmit}
+                handleChatSubmit={onHandleSubmit}
                 handleChatInputChange={handleInputChange}
                 chatInput={input}
               />
